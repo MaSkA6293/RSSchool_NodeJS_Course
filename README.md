@@ -38,35 +38,35 @@ Before the start of the course, the student must:
 
 ### Week 1
 
-- [Module "Node.js installation and configuration"](modules/nodejs-installation/README.md)
-- [Module "Node.js basics"](modules/nodejs-basics/README.md)
+- [Module "Node.js installation and configuration"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-installation/README.md)
+- [Module "Node.js basics"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-basics/README.md)
 
 ### Week 2, Week 3
 
-- [Module "Node.js application"](modules/nodejs-application/README.md)
+- [Module "Node.js application"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-application/README.md)
 
 ### Week 4
 
-- [Module "Network communication: HTTP"](modules/crud-api/README.md)
+- [Module "Network communication: HTTP"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/crud-api/README.md)
 
 ### Week 5
 
-- [Module "Network communication: WebSocket"](modules/websocket/README.md)
+- [Module "Network communication: WebSocket"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/websocket/README.md)
 
 ### Week 6
 
-- [Module "GraphQL basics"](modules/graphql/README.md)
+- [Module "GraphQL basics"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/graphql/README.md)
 
 ### Week 7
 
-- [Module "REST service"](modules/rest/rest/README.md)
+- [Module "REST service"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/rest/README.md)
 
 ### Week 8, Week 9
 
-- [Module "REST service: Containerization"](modules/rest/containerization/README.md)
-- [Module "REST service: Database & ORM"](modules/rest/database-orm/README.md)
+- [Module "REST service: Containerization"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/containerization/README.md)
+- [Module "REST service: Database & ORM"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/database-orm/README.md)
 
 ### Week 10
 
-- [Module "REST service: Logging & Error handling"](modules/rest/logging-error-handling/README.md)
-- [Module "REST service: Authentication & Authorization"](modules/rest/authentication-jwt/README.md)
+- [Module "REST service: Logging & Error handling"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/logging-error-handling/README.md)
+- [Module "REST service: Authentication & Authorization"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/authentication-jwt/README.md)
