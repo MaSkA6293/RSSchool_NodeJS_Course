@@ -4,7 +4,7 @@
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
-    "tsconfigRootDir": "./",
+    "tsconfigRootDir": ".",
     "project": "./tsconfig.json"
   },
   "plugins": ["@typescript-eslint", "prettier"],
@@ -22,7 +22,7 @@
     "import/no-extraneous-dependencies": [
       "error",
       {
-        "devDependencies": ["**/webpack.*.ts"]
+        "devDependencies": ["**/webpack.*.ts", "**/*.test.ts"]
       }
     ],
     "@typescript-eslint/no-unused-vars": ["error"],
