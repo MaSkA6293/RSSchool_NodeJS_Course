@@ -1,10 +1,11 @@
 import http from 'http';
 import url from 'url';
-import getUserId from '../helpers';
+import { getUserId } from '../helpers';
 import {
   handlerGetAllUsers,
   handlerGetUserById,
   handlerServerError,
+  handlerCreateUser,
 } from './handlers';
 
 const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
@@ -27,6 +28,10 @@ const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
     }
     if (req.method === 'GET' && path === `/api/throwError`) {
       throw new Error();
+    }
+    if (req.method === 'POST' && path === `/api/users`) {
+      handlerCreateUser(req, res);
+      return;
     }
 
     res.statusCode = 404;
