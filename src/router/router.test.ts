@@ -7,8 +7,20 @@ import { IUser, IUserCreate } from '../types';
 
 const pathToDb = resolve(__dirname, '../database/db.json');
 
+let dbOriginal = '';
+
+beforeAll(async () => {
+  try {
+    const data = await readFile(pathToDb, 'utf-8');
+    dbOriginal = JSON.parse(data);
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Error reading original dataBase file', e);
+  }
+});
+
 beforeEach(async () => {
-  const db: { users: IUser[] } = {
+  const fakeDb: { users: IUser[] } = {
     users: [
       {
         id: 'df10de70-8ab6-40c7-8432-3f3cfd9b6226',
@@ -25,10 +37,19 @@ beforeEach(async () => {
     ],
   };
   try {
-    await writeFile(pathToDb, JSON.stringify(db));
-  } catch {
+    await writeFile(pathToDb, JSON.stringify(fakeDb));
+  } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('Error reading dataBase file');
+    console.error('Error writing fake dataBase file', e);
+  }
+});
+
+afterAll(async () => {
+  try {
+    await writeFile(pathToDb, JSON.stringify(dbOriginal));
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Error writing original dataBase in file', e);
   }
 });
 
