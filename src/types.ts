@@ -1,4 +1,5 @@
 export interface IUser {
+  [key: string]: number | string | string[];
   id: string;
   username: string;
   age: number;
@@ -6,6 +7,7 @@ export interface IUser {
 }
 
 export interface IUserCreate {
+  [key: string]: number | string | string[];
   username: string;
   age: number;
   hobbies: string[];

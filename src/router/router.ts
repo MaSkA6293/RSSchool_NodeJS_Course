@@ -1,12 +1,7 @@
 import http from 'http';
 import url from 'url';
 import { getUserId } from '../helpers';
-import {
-  handlerGetAllUsers,
-  handlerGetUserById,
-  handlerServerError,
-  handlerCreateUser,
-} from './handlers';
+import * as handlers from './handlers';
 
 const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
   const requestUrl = req.url ? req.url : '';
@@ -19,25 +14,29 @@ const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
 
   try {
     if (req.method === 'GET' && path === '/api/users') {
-      handlerGetAllUsers(res);
+      handlers.handlerGetAllUsers(res);
       return;
     }
     if (req.method === 'GET' && path === `/api/users/${userId}`) {
-      handlerGetUserById(res, userId);
+      handlers.handlerGetUserById(res, userId);
       return;
     }
     if (req.method === 'GET' && path === `/api/throwError`) {
       throw new Error();
     }
     if (req.method === 'POST' && path === `/api/users`) {
-      handlerCreateUser(req, res);
+      handlers.handlerCreateUser(req, res);
+      return;
+    }
+    if (req.method === 'PUT' && path === `/api/users/${userId}`) {
+      handlers.handlerUpdateUser(req, res, userId);
       return;
     }
 
     res.statusCode = 404;
     res.end(JSON.stringify({ message: `Non-existing endpoint ${path}` }));
   } catch {
-    handlerServerError(res);
+    handlers.handlerServerError(res);
   }
 };
 

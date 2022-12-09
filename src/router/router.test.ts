@@ -233,3 +233,80 @@ describe('POST api/users', () => {
     expect(body).toHaveProperty('hobbies', user.hobbies);
   });
 });
+
+describe('PUT api/users', () => {
+  const updateRecord: IUserCreate = {
+    username: 'New name',
+    age: 19,
+    hobbies: ['test1', 'test2'],
+  };
+
+  test('Should answer with status code 201', async () => {
+    const db = await readFile(pathToDb, 'utf-8');
+
+    const { users }: { users: IUser[] } = JSON.parse(db);
+
+    const response: supertest.Response = await supertest(app)
+      .put(`/api/users/${users[0].id}`)
+      .send(updateRecord);
+
+    expect(response.statusCode).toBe(201);
+  });
+
+  test('Server should send updated record, check dataBase with updated record', async () => {
+    const db = await readFile(pathToDb, 'utf-8');
+
+    const { users }: { users: IUser[] } = JSON.parse(db);
+
+    const responseGetUser: supertest.Response = await supertest(app)
+      .get(`/api/users/${users[0].id}`)
+      .send();
+
+    const candidate: IUser = responseGetUser.body;
+
+    const responseUpdate: supertest.Response = await supertest(app)
+      .put(`/api/users/${candidate.id}`)
+      .send(updateRecord);
+
+    const updatedRecord = responseUpdate.body;
+
+    expect(updatedRecord).toHaveProperty('username', updateRecord.username);
+    expect(updatedRecord).toHaveProperty('age', updateRecord.age);
+    expect(updatedRecord).toHaveProperty('hobbies', updateRecord.hobbies);
+    expect(updatedRecord).toHaveProperty('id', candidate.id);
+
+    const responseAll: supertest.Response = await supertest(app)
+      .get(`/api/users`)
+      .send();
+
+    const candidateUpdated = responseAll.body.find(
+      (el: IUser) => el.id === updatedRecord.id
+    );
+
+    expect(candidateUpdated).toEqual(updatedRecord);
+  });
+
+  test('Server should send array of errors with incorrect fields', async () => {
+    const db = await readFile(pathToDb, 'utf-8');
+    const { users }: { users: IUser[] } = JSON.parse(db);
+
+    const incorrectUpdate = {
+      usernam: 'New name - incorrect field name',
+      age: 'string is not allowed',
+      hobbies: [1, '2'],
+      id: 'not allowed to change id',
+    };
+
+    const responseUpdate: supertest.Response = await supertest(app)
+      .put(`/api/users/${users[0].id}`)
+      .send(incorrectUpdate);
+
+    const error = [
+      'The key: usernam is incorrect',
+      'age : the field mast be of type number',
+      'hobbies : the field mast be of type string [], or empty []. One of the elements has incorrect type',
+      'The key: id is incorrect',
+    ];
+    expect(responseUpdate.body).toEqual(error);
+  });
+});
