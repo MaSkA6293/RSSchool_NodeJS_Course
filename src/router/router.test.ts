@@ -309,4 +309,17 @@ describe('PUT api/users', () => {
     ];
     expect(responseUpdate.body).toEqual(error);
   });
+
+  test('Server should answer with status code 404, user does not exist', async () => {
+    const nonExistingId = 'df10de70-8ab6-40c7-8432-3f3ccd9b6226';
+    const responseUpdate: supertest.Response = await supertest(app)
+      .put(`/api/users/${nonExistingId}`)
+      .send(updateRecord);
+
+    expect(responseUpdate.statusCode).toBe(404);
+
+    expect(responseUpdate.body.message).toBe(
+      `The user with id=${nonExistingId} doesn't exist`
+    );
+  });
 });
