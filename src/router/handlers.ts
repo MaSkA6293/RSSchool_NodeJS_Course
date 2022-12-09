@@ -124,13 +124,46 @@ export const handlerUpdateUser = async (
 
               await updateBd({ users: updatedUsers });
 
-              res.statusCode = 201;
+              res.statusCode = 200;
               res.end(JSON.stringify(updatedUser));
             } else {
               res.statusCode = 400;
               res.end(JSON.stringify(errors));
             }
           });
+      } else {
+        res.statusCode = 404;
+        const err = {
+          message: `The user with id=${userId} doesn't exist`,
+        };
+        res.end(JSON.stringify(err));
+      }
+    } else {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ message: `userId is invalid id=${userId}` }));
+    }
+  } catch {
+    res.statusCode = 500;
+    res.end('server error');
+  }
+};
+
+export const handlerDeleteUser = async (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  userId: string | undefined
+): Promise<void> => {
+  try {
+    if (userId && uuidValidate(userId)) {
+      const users: IUser[] = await getUsers();
+
+      const user: IUser | undefined = users.find((el) => el.id === userId);
+
+      if (user) {
+        const updatedUsers = users.filter((el) => el.id !== userId);
+        await updateBd({ users: updatedUsers });
+        res.statusCode = 204;
+        res.end();
       } else {
         res.statusCode = 404;
         const err = {

@@ -32,6 +32,10 @@ const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
       handlers.handlerUpdateUser(req, res, userId);
       return;
     }
+    if (req.method === 'DELETE' && path === `/api/users/${userId}`) {
+      handlers.handlerDeleteUser(req, res, userId);
+      return;
+    }
 
     res.statusCode = 404;
     res.end(JSON.stringify({ message: `Non-existing endpoint ${path}` }));

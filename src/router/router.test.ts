@@ -241,7 +241,7 @@ describe('PUT api/users', () => {
     hobbies: ['test1', 'test2'],
   };
 
-  test('Should answer with status code 201', async () => {
+  test('Should answer with status code 200', async () => {
     const db = await readFile(pathToDb, 'utf-8');
 
     const { users }: { users: IUser[] } = JSON.parse(db);
@@ -250,7 +250,7 @@ describe('PUT api/users', () => {
       .put(`/api/users/${users[0].id}`)
       .send(updateRecord);
 
-    expect(response.statusCode).toBe(201);
+    expect(response.statusCode).toBe(200);
   });
 
   test('Server should send updated record, check dataBase with updated record', async () => {
@@ -311,7 +311,8 @@ describe('PUT api/users', () => {
   });
 
   test('Server should answer with status code 404, user does not exist', async () => {
-    const nonExistingId = 'df10de70-8ab6-40c7-8432-3f3ccd9b6226';
+    const nonExistingId = uuidv4();
+
     const responseUpdate: supertest.Response = await supertest(app)
       .put(`/api/users/${nonExistingId}`)
       .send(updateRecord);
@@ -319,6 +320,62 @@ describe('PUT api/users', () => {
     expect(responseUpdate.statusCode).toBe(404);
 
     expect(responseUpdate.body.message).toBe(
+      `The user with id=${nonExistingId} doesn't exist`
+    );
+  });
+
+  test('Should answer with status code 400 and corresponding message if userId is invalid (not uuid)', async () => {
+    const response: supertest.Response = await supertest(app)
+      .put(`/api/users/12`)
+      .send(updateRecord);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe(`userId is invalid id=12`);
+  });
+});
+
+describe('DELETE api/users', () => {
+  test('Should answer with status code 204 if the record is found and deleted', async () => {
+    const db = await readFile(pathToDb, 'utf-8');
+
+    const { users }: { users: IUser[] } = JSON.parse(db);
+
+    const willBeDeletedId = users[0].id;
+    const response: supertest.Response = await supertest(app)
+      .delete(`/api/users/${willBeDeletedId}`)
+      .send();
+
+    expect(response.statusCode).toBe(204);
+
+    const checkDeletedUser: supertest.Response = await supertest(app)
+      .get(`/api/users/${willBeDeletedId}`)
+      .send();
+
+    expect(checkDeletedUser.statusCode).toBe(404);
+
+    expect(checkDeletedUser.body.message).toBe(
+      `The user with id=${willBeDeletedId} doesn't exist`
+    );
+  });
+
+  test('Should answer with status code 400 and corresponding message if userId is invalid (not uuid)', async () => {
+    const response: supertest.Response = await supertest(app)
+      .delete(`/api/users/12`)
+      .send();
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe(`userId is invalid id=12`);
+  });
+
+  test('Should answer with status code 404 and corresponding message if record with id === userId does not exist', async () => {
+    const nonExistingId = uuidv4();
+
+    const response: supertest.Response = await supertest(app)
+      .delete(`/api/users/${nonExistingId}`)
+      .send();
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body.message).toBe(
       `The user with id=${nonExistingId} doesn't exist`
     );
   });
