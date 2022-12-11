@@ -1,19 +1,20 @@
 import http from 'http';
-import { validate as uuidValidate, v4 as uuidv4 } from 'uuid';
+import { validate as uuidValidate } from 'uuid';
 import { IUser, IUserCreate } from '../types';
 import {
   validateCreateUser,
   validateUpdateUser,
-  getUsers,
   getUpdatedUsers,
-  updateBd,
 } from '../helpers';
 
+import Db from '../database/database';
+
 export const handlerGetAllUsers = async (
-  res: http.ServerResponse
+  res: http.ServerResponse,
+  db: Db
 ): Promise<void> => {
   try {
-    const users = await getUsers();
+    const users = db.getUsers();
     res.statusCode = 200;
     res.end(JSON.stringify(users));
   } catch {
@@ -24,13 +25,12 @@ export const handlerGetAllUsers = async (
 
 export const handlerGetUserById = async (
   res: http.ServerResponse,
-  userId: string | undefined
+  userId: string | undefined,
+  db: Db
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const users = await getUsers();
-
-      const user: IUser | undefined = users.find((el) => el.id === userId);
+      const user: IUser | undefined = db.getUserById(userId);
       if (user) {
         res.statusCode = 200;
         res.end(JSON.stringify(user));
@@ -62,7 +62,8 @@ export const handlerServerError = (res: http.ServerResponse) => {
 
 export const handlerCreateUser = async (
   req: http.IncomingMessage,
-  res: http.ServerResponse
+  res: http.ServerResponse,
+  db: Db
 ) => {
   const body: string[] = [];
   req
@@ -76,11 +77,7 @@ export const handlerCreateUser = async (
       if (jsonBody !== undefined && typeof jsonBody === 'object') {
         const errors = validateCreateUser(jsonBody);
         if (errors.length === 0) {
-          const newUser = { ...jsonBody, id: uuidv4() };
-
-          const users: IUser[] = await getUsers();
-
-          await updateBd({ users: [...users, newUser] });
+          const newUser = db.createUser(jsonBody);
 
           res.statusCode = 201;
           res.end(JSON.stringify(newUser));
@@ -95,13 +92,12 @@ export const handlerCreateUser = async (
 export const handlerUpdateUser = async (
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  userId: string | undefined
+  userId: string | undefined,
+  db: Db
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const users: IUser[] = await getUsers();
-
-      const user: IUser | undefined = users.find((el) => el.id === userId);
+      const user = db.getUserById(userId);
 
       if (user) {
         const body: string[] = [];
@@ -116,13 +112,9 @@ export const handlerUpdateUser = async (
             const errors = validateUpdateUser(dataToReplace);
 
             if (errors.length === 0) {
-              const { updatedUser, updatedUsers } = getUpdatedUsers(
-                user,
-                dataToReplace,
-                users
-              );
+              const updatedUser = getUpdatedUsers(user, dataToReplace);
 
-              await updateBd({ users: updatedUsers });
+              db.modifyUser(updatedUser);
 
               res.statusCode = 200;
               res.end(JSON.stringify(updatedUser));
@@ -151,17 +143,16 @@ export const handlerUpdateUser = async (
 export const handlerDeleteUser = async (
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  userId: string | undefined
+  userId: string | undefined,
+  db: Db
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const users: IUser[] = await getUsers();
-
-      const user: IUser | undefined = users.find((el) => el.id === userId);
+      const user = db.getUserById(userId);
 
       if (user) {
-        const updatedUsers = users.filter((el) => el.id !== userId);
-        await updateBd({ users: updatedUsers });
+        db.deleteUser(userId);
+
         res.statusCode = 204;
         res.end();
       } else {

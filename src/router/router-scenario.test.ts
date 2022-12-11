@@ -1,34 +1,30 @@
 import supertest from 'supertest';
-import { readFile, writeFile } from 'fs/promises';
-import { resolve } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { IUser } from '../types';
 import app from '../app';
 
-const pathToDb = resolve(__dirname, '../database/db.json');
-
-let dbOriginal = '';
-
-beforeAll(async () => {
+const cleanDb = async () => {
   try {
-    const data = await readFile(pathToDb, 'utf-8');
-    dbOriginal = JSON.parse(data);
+    const request = await supertest(app).get('/api/users').send();
 
-    const fakeDb = { users: [] };
+    const users = request.body;
 
-    await writeFile(pathToDb, JSON.stringify(fakeDb));
+    const allDelete = users.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${el.id}`)
+            .send()
+            .then((data) => res(data));
+        })
+    );
+
+    await Promise.allSettled(allDelete);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('Error rewriting original dataBase file with fakeDb file', e);
+    console.error('Error reading original dataBase file', e);
   }
-});
-
-afterAll(async () => {
-  try {
-    await writeFile(pathToDb, JSON.stringify(dbOriginal));
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Error writing original dataBase in file', e);
-  }
-});
+};
 
 describe('Scenario one', () => {
   const newRecord = {
@@ -38,6 +34,8 @@ describe('Scenario one', () => {
   };
 
   let idNewRecord = '';
+
+  beforeAll(() => cleanDb());
 
   test('Get all records with a GET api/users request (an empty array is expected)', async () => {
     const response: supertest.Response = await supertest(app)
@@ -109,5 +107,261 @@ describe('Scenario one', () => {
       .send();
 
     expect(getDeletedObject.statusCode).toBe(404);
+  });
+});
+
+describe('Scenario two', () => {
+  beforeAll(() => cleanDb());
+
+  const newRecords: IUser[] = [
+    {
+      id: '',
+      username: 'John',
+      age: 35,
+      hobbies: ['Tennis', 'Train watching'],
+    },
+    {
+      id: '',
+      username: 'Tom',
+      age: 35,
+      hobbies: ['Fishing', 'Cycling'],
+    },
+    {
+      id: '',
+      username: 'Anna',
+      age: 35,
+      hobbies: ['Cooking', 'Running'],
+    },
+  ];
+
+  test('Create three new records', async () => {
+    const allCreate = newRecords.map(
+      (el: IUser, i: number) =>
+        new Promise((res) => {
+          supertest(app)
+            .post('/api/users')
+            .send(el)
+            .then((data) => {
+              newRecords[i].id = data.body.id;
+              res(data);
+            });
+        })
+    );
+
+    await Promise.allSettled(allCreate);
+
+    const getAllRecords = await supertest(app).get('/api/users').send();
+
+    expect(getAllRecords.statusCode).toBe(200);
+    expect((getAllRecords.body as IUser[]).length).toBe(3);
+  });
+
+  test('Remove two first records', async () => {
+    const getAllRecords = await supertest(app).get('/api/users').send();
+
+    const users = getAllRecords.body;
+
+    expect(users.length).toBe(3);
+
+    const forDelete = users.slice(0, 2);
+
+    const deletePromise = forDelete.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${el.id}`)
+            .send()
+            .then((data) => res(data));
+        })
+    );
+
+    await Promise.allSettled(deletePromise);
+
+    const getAllAfterDelete = await supertest(app).get('/api/users').send();
+
+    const usersAfterDelete = getAllAfterDelete.body;
+
+    expect(usersAfterDelete.length).toBe(1);
+  });
+
+  test('Create two records again', async () => {
+    const forCreate = newRecords.slice(0, 2);
+
+    const allCreate = forCreate.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .post('/api/users')
+            .send(el)
+            .then((data) => res(data));
+        })
+    );
+
+    await Promise.allSettled(allCreate);
+
+    const getAllAfterCreate = await supertest(app).get('/api/users').send();
+
+    const usersAfterCreate = getAllAfterCreate.body;
+
+    expect(usersAfterCreate.length).toBe(3);
+  });
+
+  test('Send three wrong requests to create new record', async () => {
+    interface IWrongUserCreate {
+      username: number;
+      age: string;
+      hobbies: string | number;
+    }
+
+    const newIncorrectRecords: IWrongUserCreate[] = [
+      {
+        username: 35,
+        age: 'John',
+        hobbies: "['Tennis', 'Train watching']",
+      },
+      {
+        username: 35,
+        age: 'John',
+        hobbies: 22,
+      },
+      {
+        username: 35,
+        age: 'John',
+        hobbies: 16,
+      },
+    ];
+
+    const responseWrongData: string[] = [
+      'username : the field mast be of type string',
+      'age : the field mast be of type number',
+      'hobbies : the field mast be of type string [], or empty []',
+    ];
+
+    newIncorrectRecords.map(
+      (el: IWrongUserCreate) =>
+        new Promise((res) => {
+          supertest(app)
+            .post('/api/users')
+            .send(el)
+            .then((response: supertest.Response) => {
+              expect(response.body).toEqual(responseWrongData);
+              res(response.body);
+            });
+        })
+    );
+
+    const getAllAfterCreate = await supertest(app).get('/api/users').send();
+
+    const usersAfterCreate = getAllAfterCreate.body;
+
+    expect(usersAfterCreate.length).toBe(3);
+  });
+
+  test('Try to delete notExisting records', async () => {
+    const notExistingIds: string[] = [uuidv4(), uuidv4(), uuidv4()];
+
+    notExistingIds.map(
+      (id: string) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${id}`)
+            .send()
+            .then((response: supertest.Response) => {
+              const answer = {
+                message: `The user with id=${id} doesn't exist`,
+              };
+              expect(response.body).toEqual(answer);
+              res(response.body);
+            });
+        })
+    );
+
+    const getAllAfterRequests = await supertest(app).get('/api/users').send();
+
+    const usersAfterRequest = getAllAfterRequests.body;
+
+    expect(usersAfterRequest.length).toBe(3);
+  });
+
+  test('Try to send incorrect routs, GET, POST, DELETE, PUT ', async () => {
+    const notExistingRoutes: string[] = [
+      '/api/data',
+      '/messages/home',
+      '/contacts/pay',
+      '/api/contacts/pay',
+      '/api/users/pay/dead',
+    ];
+
+    notExistingRoutes.map(
+      (route: string) =>
+        new Promise((res) => {
+          supertest(app)
+            .get(`${route}`)
+            .send()
+            .then((response: supertest.Response) => {
+              const answer = {
+                message: `Non-existing endpoint ${route}`,
+              };
+
+              expect(response.body).toEqual(answer);
+              res(response.body);
+            });
+        })
+    );
+
+    notExistingRoutes.map(
+      (route: string) =>
+        new Promise((res) => {
+          supertest(app)
+            .post(`${route}`)
+            .send()
+            .then((response: supertest.Response) => {
+              const answer = {
+                message: `Non-existing endpoint ${route}`,
+              };
+
+              expect(response.body).toEqual(answer);
+              res(response.body);
+            });
+        })
+    );
+
+    notExistingRoutes.map(
+      (route: string) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`${route}`)
+            .send()
+            .then((response: supertest.Response) => {
+              const answer = {
+                message: `Non-existing endpoint ${route}`,
+              };
+
+              expect(response.body).toEqual(answer);
+              res(response.body);
+            });
+        })
+    );
+
+    notExistingRoutes.map(
+      (route: string) =>
+        new Promise((res) => {
+          supertest(app)
+            .put(`${route}`)
+            .send()
+            .then((response: supertest.Response) => {
+              const answer = {
+                message: `Non-existing endpoint ${route}`,
+              };
+
+              expect(response.body).toEqual(answer);
+              res(response.body);
+            });
+        })
+    );
+
+    const getAllAfterRequests = await supertest(app).get('/api/users').send();
+    const usersAfterRequests = getAllAfterRequests.body;
+    expect(usersAfterRequests.length).toBe(3);
   });
 });

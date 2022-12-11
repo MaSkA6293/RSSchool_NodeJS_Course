@@ -111,23 +111,15 @@ export const getUsers = async (): Promise<IUser[]> => {
 
 export const getUpdatedUsers = (
   user: IUser,
-  dataToReplace: IUserCreate,
-  users: IUser[]
-): { updatedUser: IUser; updatedUsers: IUser[] } => {
+  dataToReplace: IUserCreate
+): IUser => {
   const updatedUser = { ...user };
 
   Object.keys(dataToReplace).forEach((key) => {
     updatedUser[key] = dataToReplace[key];
   });
 
-  const updatedUsers = users.map((el) => {
-    if (el.id === updatedUser.id) {
-      return updatedUser;
-    }
-    return el;
-  });
-
-  return { updatedUser, updatedUsers };
+  return updatedUser;
 };
 
 export const updateBd = async (data: { users: IUser[] }) => {

@@ -2,8 +2,13 @@ import http from 'http';
 import url from 'url';
 import { getUserId } from '../helpers';
 import * as handlers from './handlers';
+import Db from '../database/database';
 
-const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
+const router = (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  db: Db
+) => {
   const requestUrl = req.url ? req.url : '';
 
   const { path } = url.parse(requestUrl, true);
@@ -14,26 +19,26 @@ const router = (req: http.IncomingMessage, res: http.ServerResponse) => {
 
   try {
     if (req.method === 'GET' && path === '/api/users') {
-      handlers.handlerGetAllUsers(res);
+      handlers.handlerGetAllUsers(res, db);
       return;
     }
     if (req.method === 'GET' && path === `/api/users/${userId}`) {
-      handlers.handlerGetUserById(res, userId);
+      handlers.handlerGetUserById(res, userId, db);
       return;
     }
     if (req.method === 'GET' && path === `/api/throwError`) {
       throw new Error();
     }
     if (req.method === 'POST' && path === `/api/users`) {
-      handlers.handlerCreateUser(req, res);
+      handlers.handlerCreateUser(req, res, db);
       return;
     }
     if (req.method === 'PUT' && path === `/api/users/${userId}`) {
-      handlers.handlerUpdateUser(req, res, userId);
+      handlers.handlerUpdateUser(req, res, userId, db);
       return;
     }
     if (req.method === 'DELETE' && path === `/api/users/${userId}`) {
-      handlers.handlerDeleteUser(req, res, userId);
+      handlers.handlerDeleteUser(req, res, userId, db);
       return;
     }
 

@@ -1,59 +1,76 @@
 import supertest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
-import { readFile, writeFile } from 'fs/promises';
-import { resolve } from 'path';
 import app from '../app';
 import { IUser, IUserCreate } from '../types';
 
-const pathToDb = resolve(__dirname, '../database/db.json');
+const fakeDb: { users: IUser[] } = {
+  users: [
+    {
+      id: '',
+      username: 'Jon',
+      age: 35,
+      hobbies: ['skating', 'fishing', 'running'],
+    },
+    {
+      id: '',
+      username: 'Anna',
+      age: 32,
+      hobbies: ['knitting', 'dancing', 'cooking'],
+    },
+  ],
+};
 
-let dbOriginal = '';
-
-beforeAll(async () => {
+const setDb = async () => {
   try {
-    const data = await readFile(pathToDb, 'utf-8');
-    dbOriginal = JSON.parse(data);
+    const allCreate = fakeDb.users.map(
+      (el: IUser, i: number) =>
+        new Promise((res) => {
+          supertest(app)
+            .post(`/api/users`)
+            .send(el)
+            .then((data) => {
+              fakeDb.users[i].id = data.body.id;
+              res(data);
+            });
+        })
+    );
+
+    await Promise.allSettled(allCreate);
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error('Error reading original dataBase file', e);
   }
-});
+};
 
-beforeEach(async () => {
-  const fakeDb: { users: IUser[] } = {
-    users: [
-      {
-        id: 'df10de70-8ab6-40c7-8432-3f3cfd9b6226',
-        username: 'Jon',
-        age: 35,
-        hobbies: ['skating', 'fishing', 'running'],
-      },
-      {
-        id: '962eb785-b7e3-48c1-b7fa-cfdb465c80ff',
-        username: 'Anna',
-        age: 32,
-        hobbies: ['knitting', 'dancing', 'cooking'],
-      },
-    ],
-  };
+const cleanDb = async () => {
   try {
-    await writeFile(pathToDb, JSON.stringify(fakeDb));
+    const request = await supertest(app).get('/api/users').send();
+
+    const users = request.body;
+
+    const allDelete = users.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${el.id}`)
+            .send()
+            .then((data) => res(data));
+        })
+    );
+
+    await Promise.allSettled(allDelete);
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error('Error writing fake dataBase file', e);
+    console.error('Error reading original dataBase file', e);
   }
-});
-
-afterAll(async () => {
-  try {
-    await writeFile(pathToDb, JSON.stringify(dbOriginal));
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Error writing original dataBase in file', e);
-  }
-});
+};
 
 describe('GET api/users', () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await setDb();
+  });
+
   test('Should answer with status code 200', async () => {
     const response: supertest.Response = await supertest(app)
       .get('/api/users')
@@ -63,26 +80,18 @@ describe('GET api/users', () => {
   });
 
   test('Server should send all users records', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
-
-    const { users }: { users: IUser[] } = JSON.parse(db);
-
     const response: supertest.Response = await supertest(app)
       .get('/api/users')
       .send();
 
-    expect(response.body.length).toEqual(users.length);
+    expect(response.body.length).toEqual(fakeDb.users.length);
   });
 });
 
 describe(`GET api/users/\${userId}`, () => {
   test('Server should answer with status code 200', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
-
-    const { users }: { users: IUser[] } = JSON.parse(db);
-
     const response: supertest.Response = await supertest(app)
-      .get(`/api/users/${users[0].id}`)
+      .get(`/api/users/${fakeDb.users[0].id}`)
       .send();
 
     expect(response.statusCode).toBe(200);
@@ -263,9 +272,11 @@ describe('PUT api/users', () => {
   };
 
   test('Should answer with status code 200', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
+    const getAllUsers: supertest.Response = await supertest(app)
+      .get(`/api/users`)
+      .send();
 
-    const { users }: { users: IUser[] } = JSON.parse(db);
+    const users = getAllUsers.body;
 
     const response: supertest.Response = await supertest(app)
       .put(`/api/users/${users[0].id}`)
@@ -275,9 +286,11 @@ describe('PUT api/users', () => {
   });
 
   test('Server should send updated record, check dataBase with updated record', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
+    const getAllUsers: supertest.Response = await supertest(app)
+      .get(`/api/users`)
+      .send();
 
-    const { users }: { users: IUser[] } = JSON.parse(db);
+    const users = getAllUsers.body;
 
     const responseGetUser: supertest.Response = await supertest(app)
       .get(`/api/users/${users[0].id}`)
@@ -308,9 +321,11 @@ describe('PUT api/users', () => {
   });
 
   test('Server should send array of errors with incorrect fields', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
-    const { users }: { users: IUser[] } = JSON.parse(db);
+    const getAllUsers: supertest.Response = await supertest(app)
+      .get(`/api/users`)
+      .send();
 
+    const users = getAllUsers.body;
     const incorrectUpdate = {
       usernam: 'New name - incorrect field name',
       age: 'string is not allowed',
@@ -357,10 +372,11 @@ describe('PUT api/users', () => {
 
 describe('DELETE api/users', () => {
   test('Should answer with status code 204 if the record is found and deleted', async () => {
-    const db = await readFile(pathToDb, 'utf-8');
+    const getAllUsers: supertest.Response = await supertest(app)
+      .get(`/api/users`)
+      .send();
 
-    const { users }: { users: IUser[] } = JSON.parse(db);
-
+    const users = getAllUsers.body;
     const willBeDeletedId = users[0].id;
     const response: supertest.Response = await supertest(app)
       .delete(`/api/users/${willBeDeletedId}`)
