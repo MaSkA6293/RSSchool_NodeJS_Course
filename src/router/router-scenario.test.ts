@@ -302,7 +302,7 @@ describe('Scenario two', () => {
               const answer = {
                 message: `Non-existing endpoint ${route}`,
               };
-
+              expect(response.statusCode).toEqual(404);
               expect(response.body).toEqual(answer);
               res(response.body);
             });
@@ -319,7 +319,7 @@ describe('Scenario two', () => {
               const answer = {
                 message: `Non-existing endpoint ${route}`,
               };
-
+              expect(response.statusCode).toEqual(404);
               expect(response.body).toEqual(answer);
               res(response.body);
             });
@@ -336,7 +336,7 @@ describe('Scenario two', () => {
               const answer = {
                 message: `Non-existing endpoint ${route}`,
               };
-
+              expect(response.statusCode).toEqual(404);
               expect(response.body).toEqual(answer);
               res(response.body);
             });
@@ -353,7 +353,7 @@ describe('Scenario two', () => {
               const answer = {
                 message: `Non-existing endpoint ${route}`,
               };
-
+              expect(response.statusCode).toEqual(404);
               expect(response.body).toEqual(answer);
               res(response.body);
             });
@@ -363,5 +363,136 @@ describe('Scenario two', () => {
     const getAllAfterRequests = await supertest(app).get('/api/users').send();
     const usersAfterRequests = getAllAfterRequests.body;
     expect(usersAfterRequests.length).toBe(3);
+  });
+});
+
+describe('Scenario three', () => {
+  const newRecord = {
+    username: 'John',
+    age: 35,
+    hobbies: ['Tennis', 'Train watching'],
+  };
+
+  beforeAll(() => cleanDb());
+
+  test('Create "n" new records', async () => {
+    const getAllRecords = await supertest(app).get('/api/users').send();
+    const users = getAllRecords.body;
+    expect(getAllRecords.statusCode).toBe(200);
+    expect(users.length).toBe(0);
+
+    const n = 100;
+
+    const iterations = new Array<string>(n).fill('1');
+
+    iterations.map(
+      () =>
+        new Promise((res) => {
+          supertest(app)
+            .post('/api/users')
+            .send(newRecord)
+            .then((response: supertest.Response) => {
+              const user = response.body;
+
+              expect(response.statusCode).toEqual(201);
+
+              res(user);
+            });
+        })
+    );
+
+    const getAllCreatedUsers = await supertest(app).get('/api/users').send();
+
+    const createdUsers = getAllCreatedUsers.body;
+    expect(getAllCreatedUsers.statusCode).toBe(200);
+    expect(createdUsers.length).toBe(n);
+  });
+
+  test('Try to delete "n" notExisting records', async () => {
+    const getAllUsers = await supertest(app).get('/api/users').send();
+
+    const users = getAllUsers.body;
+    expect(getAllUsers.statusCode).toBe(200);
+
+    const n = 100;
+
+    const iterations = new Array<string>(n).fill(uuidv4());
+
+    iterations.map(
+      (id) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${id}`)
+            .send()
+            .then((response: supertest.Response) => {
+              expect(response.statusCode).toEqual(404);
+
+              res(response);
+            });
+        })
+    );
+
+    const usersAfterAttemptDeleting = await supertest(app)
+      .get('/api/users')
+      .send();
+
+    expect(getAllUsers.statusCode).toBe(200);
+    expect(usersAfterAttemptDeleting.body.length).toBe(users.length);
+  });
+
+  test('Try to delete 10 records', async () => {
+    const getAllUsers = await supertest(app).get('/api/users').send();
+
+    const users = getAllUsers.body;
+
+    expect(getAllUsers.statusCode).toBe(200);
+
+    const usersForDelete = users.slice(0, 10);
+
+    usersForDelete.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .delete(`/api/users/${el.id}`)
+            .send()
+            .then((response: supertest.Response) => {
+              expect(response.statusCode).toEqual(204);
+
+              res(response);
+            });
+        })
+    );
+
+    const usersAfterDeleting = await supertest(app).get('/api/users').send();
+
+    expect(usersAfterDeleting.statusCode).toBe(200);
+    expect(usersAfterDeleting.body.length).toBe(users.length - 10);
+  });
+
+  test('Try to update 10 records', async () => {
+    const getAllUsers = await supertest(app).get('/api/users').send();
+
+    const update: Partial<IUser> = { age: 18 };
+
+    const users = getAllUsers.body;
+
+    expect(getAllUsers.statusCode).toBe(200);
+
+    const usersForUpdate = users.slice(0, 10);
+
+    usersForUpdate.map(
+      (el: IUser) =>
+        new Promise((res) => {
+          supertest(app)
+            .put(`/api/users/${el.id}`)
+            .send(update)
+            .then((response: supertest.Response) => {
+              expect(response.statusCode).toEqual(201);
+
+              expect(response.body.age).toEqual(update.age);
+              res(response);
+            });
+        })
+    );
   });
 });
