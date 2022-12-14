@@ -19,3 +19,7 @@ export interface IFieldCreateUser {
   errorRequired: string;
   errorType: string;
 }
+
+export interface IPidToPort {
+  [key: string]: number;
+}

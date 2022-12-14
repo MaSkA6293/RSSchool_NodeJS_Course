@@ -6,6 +6,7 @@
   "scripts": {
     "start:dev": "nodemon ./src/server.ts",
     "start:prod": "npm run build && npm run startServer",
+    "start:multi": "nodemon ./src/multiServer.ts",
     "build": "webpack --mode=production",
     "startServer": "node ./dist/bundle.js",
     "lint": "eslint ./src --ext .js,.ts",
