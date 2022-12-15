@@ -236,7 +236,7 @@ describe('POST api/users', () => {
   test('Server should send all missing fields', async () => {
     const response: supertest.Response = await supertest(app)
       .post('/api/users')
-      .send(undefined);
+      .send({});
 
     const { body } = response;
 
@@ -245,6 +245,19 @@ describe('POST api/users', () => {
       'age : the field age is required',
       'hobbies : the field hobbies is required',
     ];
+    expect(body).toEqual(error);
+  });
+
+  test('Server should send an error message - incorrect format, status code 400', async () => {
+    const response: supertest.Response = await supertest(app)
+      .post('/api/users')
+      .send(undefined);
+
+    const { body } = response;
+
+    const error = { message: 'Error, data is in correct JSON format ' };
+
+    expect(response.statusCode).toBe(400);
     expect(body).toEqual(error);
   });
 

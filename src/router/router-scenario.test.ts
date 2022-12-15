@@ -487,7 +487,7 @@ describe('Scenario three', () => {
             .put(`/api/users/${el.id}`)
             .send(update)
             .then((response: supertest.Response) => {
-              expect(response.statusCode).toEqual(201);
+              expect(response.statusCode).toEqual(200);
 
               expect(response.body.age).toEqual(update.age);
               res(response);

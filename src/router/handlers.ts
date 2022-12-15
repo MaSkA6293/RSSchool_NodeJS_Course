@@ -5,16 +5,16 @@ import {
   validateCreateUser,
   validateUpdateUser,
   getUpdatedUsers,
+  checkDataFormat,
 } from '../helpers';
 
-import Db from '../database/database';
+import dataBase from '../database';
 
 export const handlerGetAllUsers = async (
-  res: http.ServerResponse,
-  db: Db
+  res: http.ServerResponse
 ): Promise<void> => {
   try {
-    const users = db.getUsers();
+    const users = await dataBase.getUsers();
     res.statusCode = 200;
     res.end(JSON.stringify(users));
   } catch {
@@ -25,12 +25,11 @@ export const handlerGetAllUsers = async (
 
 export const handlerGetUserById = async (
   res: http.ServerResponse,
-  userId: string | undefined,
-  db: Db
+  userId: string | undefined
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const user: IUser | undefined = db.getUserById(userId);
+      const user: IUser | undefined = await dataBase.getUserById(userId);
       if (user) {
         res.statusCode = 200;
         res.end(JSON.stringify(user));
@@ -62,22 +61,31 @@ export const handlerServerError = (res: http.ServerResponse) => {
 
 export const handlerCreateUser = async (
   req: http.IncomingMessage,
-  res: http.ServerResponse,
-  db: Db
+  res: http.ServerResponse
 ) => {
-  const body: string[] = [];
+  let body = '';
   req
     .on('data', (chunk) => {
-      body.push(chunk);
+      body += chunk;
     })
     .on('end', async () => {
-      const jsonBody: IUserCreate =
-        body.length > 0 ? await JSON.parse(body.toString()) : [];
+      const isCorrectFormat = await checkDataFormat(body);
 
-      if (jsonBody !== undefined && typeof jsonBody === 'object') {
-        const errors = validateCreateUser(jsonBody);
+      if (!isCorrectFormat) {
+        res.statusCode = 400;
+        res.end(
+          JSON.stringify({
+            message: `Error, data is in correct JSON format ${body}`,
+          })
+        );
+        return;
+      }
+
+      const data = await JSON.parse(body);
+      if (data !== undefined && typeof data === 'object') {
+        const errors = validateCreateUser(data);
         if (errors.length === 0) {
-          const newUser = db.createUser(jsonBody);
+          const newUser = await dataBase.createUser(data);
 
           res.statusCode = 201;
           res.end(JSON.stringify(newUser));
@@ -92,29 +100,39 @@ export const handlerCreateUser = async (
 export const handlerUpdateUser = async (
   req: http.IncomingMessage,
   res: http.ServerResponse,
-  userId: string | undefined,
-  db: Db
+  userId: string | undefined
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const user = db.getUserById(userId);
+      const user = await dataBase.getUserById(userId);
 
       if (user) {
-        const body: string[] = [];
+        let body = '';
         req
           .on('data', (chunk) => {
-            body.push(chunk);
+            body += chunk;
           })
           .on('end', async () => {
+            const isCorrectFormat = await checkDataFormat(body);
+            if (!isCorrectFormat) {
+              res.statusCode = 400;
+              res.end(
+                JSON.stringify({
+                  message: `Error, data is in correct JSON format ${body}`,
+                })
+              );
+              return;
+            }
+
             const dataToReplace: IUserCreate =
-              body.length > 0 ? await JSON.parse(body.toString()) : {};
+              body.length > 0 ? await JSON.parse(body) : {};
 
             const errors = validateUpdateUser(dataToReplace);
 
             if (errors.length === 0) {
               const updatedUser = getUpdatedUsers(user, dataToReplace);
 
-              db.modifyUser(updatedUser);
+              await dataBase.modifyUser(updatedUser);
 
               res.statusCode = 200;
               res.end(JSON.stringify(updatedUser));
@@ -141,18 +159,14 @@ export const handlerUpdateUser = async (
 };
 
 export const handlerDeleteUser = async (
-  req: http.IncomingMessage,
   res: http.ServerResponse,
-  userId: string | undefined,
-  db: Db
+  userId: string | undefined
 ): Promise<void> => {
   try {
     if (userId && uuidValidate(userId)) {
-      const user = db.getUserById(userId);
+      const isDeleteSuccess: boolean = await dataBase.deleteUser(userId);
 
-      if (user) {
-        db.deleteUser(userId);
-
+      if (isDeleteSuccess) {
         res.statusCode = 204;
         res.end();
       } else {

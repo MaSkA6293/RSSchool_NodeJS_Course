@@ -2,56 +2,81 @@
 import http from 'http';
 import * as createUrl from 'url';
 import * as dotenv from 'dotenv';
-import cluster, { Worker } from 'node:cluster';
-import { cpus, EOL } from 'node:os';
+import cluster, { Worker } from 'cluster';
+import { cpus, EOL } from 'os';
 import process from 'node:process';
-import { IUserCreate, IPidToPort } from './types';
-import Db from './database/database';
+import { IPidToPort, IUser } from './types';
+import dataBase from './database';
+import router from './router/router';
 
 dotenv.config();
 
 const numCPUs = cpus().length;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
 
 if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
-
   const pidToPort: IPidToPort = {};
 
-  let worker: Worker;
   let port = 0;
 
   for (let i = 0; i < numCPUs; i += 1) {
-    port = 4001 + i;
+    port = PORT + 1 + i;
 
-    worker = cluster.fork({ PORT: port });
+    const worker: Worker = cluster.fork({ PORT: port });
+
     pidToPort[worker.process.pid as keyof IPidToPort] = port;
+
+    worker.on('message', async (msg) => {
+      const { message }: { message: string } = JSON.parse(msg);
+
+      if (message === 'getAllUsers') {
+        const users: IUser[] = await dataBase.getUsers();
+        worker.send(JSON.stringify({ message: 'users', users }));
+        return;
+      }
+      if (message === 'createUser') {
+        const { user }: { user: IUser } = JSON.parse(msg);
+        dataBase.addUser(user);
+        return;
+      }
+      if (message === 'getUserById') {
+        const { userId }: { userId: string } = JSON.parse(msg);
+        const user = await dataBase.getUserById(userId);
+        worker.send(
+          JSON.stringify({
+            message: `user is ${user ? '' : 'not '}found`,
+            user,
+          })
+        );
+      }
+      if (message === 'deleteUser') {
+        const { userId }: { userId: string } = JSON.parse(msg);
+        const isSuccess = await dataBase.deleteUser(userId);
+        worker.send(
+          JSON.stringify({
+            message: `user was ${isSuccess ? '' : 'not '}removed`,
+            result: isSuccess,
+          })
+        );
+      }
+      if (message === 'modifyUser') {
+        const { user }: { user: IUser } = JSON.parse(msg);
+        await dataBase.modifyUser(user);
+        worker.send(
+          JSON.stringify({
+            message: `user was modified`,
+            result: true,
+          })
+        );
+      }
+    });
   }
 
-  // cluster.on('exit', () => {
-  //   console.log(
-  //     `worker ${worker.process.pid} on port ${
-  //       pidToPort[worker.process.pid as keyof IPidToPort]
-  //     } died`
-  //   );
+  let activeWorker = PORT + 1;
 
-  //   cluster.fork({ PORT: pidToPort[worker.process.pid as keyof IPidToPort] });
-  // });
-
-  cluster.on('message', (msg) => {
-    console.log(
-      `message from worker ${worker.process.pid} on port ${
-        pidToPort[worker.process.pid as keyof IPidToPort]
-      } ${JSON.stringify(msg)}`
-    );
-  });
-
-  let activeWorker = 4001;
-
-  const appMain: http.Server = http.createServer(
+  const loadBalancer: http.Server = http.createServer(
     async (req: http.IncomingMessage, res: http.ServerResponse) => {
       const values = Object.entries(pidToPort);
-
-      const db: Db = new Db();
 
       const activePid = values.find((el) => el[1] === activeWorker);
 
@@ -61,15 +86,12 @@ if (cluster.isPrimary) {
         if (workerLink) {
           const { method } = req;
 
-          const body: string[] = [];
+          let body = '';
           req
             .on('data', (chunk) => {
-              body.push(chunk);
+              body += chunk;
             })
             .on('end', async () => {
-              const jsonBody: IUserCreate =
-                body.length > 0 ? await JSON.parse(body.toString()) : [];
-
               const requestUrl = req.url ? req.url : '';
 
               const { path } = createUrl.parse(requestUrl, true);
@@ -95,10 +117,10 @@ if (cluster.isPrimary) {
 
                   workerResponse
                     .on('end', () => {
-                      console.log('Body: ', data);
                       res.statusCode = workerResponse.statusCode
                         ? workerResponse.statusCode
                         : 200;
+                      res.setHeader('Content-Type', 'application/json');
                       res.end(data);
                     })
 
@@ -107,26 +129,30 @@ if (cluster.isPrimary) {
                     });
                 }
               );
-              requestToActiveWorker.write(JSON.stringify(jsonBody));
+              requestToActiveWorker.write(body);
               requestToActiveWorker.end();
+
+              if (activeWorker === PORT + numCPUs) {
+                activeWorker = PORT + 1;
+              } else {
+                activeWorker += 1;
+              }
             });
         }
-      }
-      if (activeWorker === 4004) {
-        activeWorker = 4001;
-      } else {
-        activeWorker += 1;
       }
     }
   );
 
-  appMain.listen(4000, () => {
-    process.stdout.write(`Main server has been started on port: 4000${EOL}`);
+  loadBalancer.listen(process.env.PORT, () => {
+    process.stdout.write(
+      `Load balancer is running on port: ${process.env.PORT}${EOL}`
+    );
   });
 } else {
   const app: http.Server = http.createServer(
     (req: http.IncomingMessage, res: http.ServerResponse) => {
       console.log(process.env.PORT, 'have got a request');
+      router(req, res);
     }
   );
 

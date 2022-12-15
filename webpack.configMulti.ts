@@ -4,7 +4,7 @@ import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 
 const config: Configuration = {
   mode: 'production',
-  entry: './src/server.ts',
+  entry: './src/multiServer.ts',
   target: 'node',
   module: {
     rules: [

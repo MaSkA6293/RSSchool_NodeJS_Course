@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'url';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { IUserCreate, IFieldCreateUser, IUser } from './types';
 
 const pathToDb = path.join(__dirname, './database/db.json');
@@ -124,4 +125,79 @@ export const getUpdatedUsers = (
 
 export const updateBd = async (data: { users: IUser[] }) => {
   await writeFile(pathToDb, JSON.stringify(data));
+};
+
+export const workerCreateUser = async (data: IUserCreate): Promise<IUser> => {
+  const newUser = { ...data, id: uuidv4() };
+
+  process!.send!(JSON.stringify({ message: 'createUser', user: newUser }));
+
+  return newUser;
+};
+
+export const getAllUsersFromParent = async (): Promise<IUser[]> =>
+  new Promise((res) => {
+    process!.send!(JSON.stringify({ message: 'getAllUsers' }));
+
+    process.on('message', (data: { message: string; users: IUser[] }) => {
+      const { users }: { message: string; users: IUser[] } = JSON.parse(
+        data.toString()
+      );
+      res(users);
+      process.removeAllListeners('message');
+    });
+  });
+
+export const workerGetUserById = async (
+  userId: string
+): Promise<IUser | undefined> =>
+  new Promise((res) => {
+    process!.send!(JSON.stringify({ message: 'getUserById', userId }));
+
+    process.on(
+      'message',
+      (data: { message: string; user: IUser | undefined }) => {
+        const { user }: { message: string; user: IUser | undefined } =
+          JSON.parse(data.toString());
+        res(user);
+        process.removeAllListeners('message');
+      }
+    );
+  });
+
+export const workerDeleteUser = async (userId: string): Promise<boolean> =>
+  new Promise((res) => {
+    process!.send!(JSON.stringify({ message: 'deleteUser', userId }));
+
+    process.on('message', (data: { message: string; result: boolean }) => {
+      const { result }: { message: string; result: boolean } = JSON.parse(
+        data.toString()
+      );
+
+      res(result);
+      process.removeAllListeners('message');
+    });
+  });
+
+export const workerModifyUser = async (user: IUser): Promise<boolean> =>
+  new Promise((res) => {
+    process!.send!(JSON.stringify({ message: 'modifyUser', user }));
+
+    process.on('message', (data: { message: string; result: boolean }) => {
+      const { result }: { message: string; result: boolean } = JSON.parse(
+        data.toString()
+      );
+
+      res(result);
+      process.removeAllListeners('message');
+    });
+  });
+
+export const checkDataFormat = async (body: string): Promise<boolean> => {
+  try {
+    await JSON.parse(body);
+  } catch {
+    return false;
+  }
+  return true;
 };
