@@ -6,8 +6,8 @@
   "scripts": {
     "start:dev": "nodemon ./src/server.ts",
     "start:prod": "npm run build && npm run startServer",
-    "start:dev-multi": "nodemon ./src/multiServer.ts",
-    "start:prod-multi": "npm run build:multi && npm run startServer",
+    "start:multi-dev": "nodemon ./src/multiServer.ts",
+    "start:multi": "npm run build:multi && npm run startServer",
     "build": "webpack --mode=production",
     "build:multi": "webpack --config ./webpack.configMulti.ts",
     "startServer": "node ./dist/bundle.js",

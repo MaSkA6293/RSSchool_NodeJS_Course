@@ -1,72 +1,75 @@
-# RS School. Node.js Course
+# CRUD API
 
-## Course goal
+## Description
 
-- The goal of the course is to teach you the basics of Node.js, related technologies and tools for successfully building a backend API
+Simple CRUD API with in-memory database.
 
-## Admission to the course
+## Technical requirements
 
-- Anyone who wishes is enrolled in the course
-- The course is free
+- Use 18 LTS version of Node.js
 
-## Prerequisites
+## Install
 
-Before the start of the course, the student must:
+1. Install Node.js
+2. Clone this repository
+3. Switch branch <code>CRUD-api</code>
+4. To install all dependencies use <code>npm install</code>
 
-- Have good knowledge of JavaScript
-- Have basic knowledge of Git, Github
-- Have basic knowledge of TypeScript
-- Have basic knowledge of Computer Science
-- Be able to spend **at least 20 hours** per week for studying
+## Run the APP
 
-## Course topics
+Development mode:
 
-- Node.js basics
-- WebSocket
-- GraphQL basics
-- REST API
-- Databases
-- SQL basics
-- Testing of Node.js-application
-- Containerization, Docker
-- Authorization/authentication, JWT
-- Logging and error handling
-- Backend frameworks
-- TypeScript
+```bash
+npm run start:dev
+```
 
-## Course program
+Production mode:
 
-### Week 1
+```bash
+npm run start:prod
+```
 
-- [Module "Node.js installation and configuration"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-installation/README.md)
-- [Module "Node.js basics"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-basics/README.md)
+Development mode with a load balancer:
 
-### Week 2, Week 3
+```bash
+npm run start:multi-dev
+```
 
-- [Module "Node.js application"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/nodejs-application/README.md)
+Production mode with a load balancer:
 
-### Week 4
+```bash
+npm run start start:multi
+```
 
-- [Module "Network communication: HTTP"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/crud-api/README.md)
+Run tests:
 
-### Week 5
+```bash
+npm run test
+```
 
-- [Module "Network communication: WebSocket"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/websocket/README.md)
+Run ESlint
 
-### Week 6
+```bash
+npm run lint
+```
 
-- [Module "GraphQL basics"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/graphql/README.md)
+## API
 
-### Week 7
+Endpoint: **api/users**
 
-- [Module "REST service"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/rest/README.md)
+GET <code>api/users</code> - to get all users records
 
-### Week 8, Week 9
+GET <code>api/users/${userId}</code> - to get user by Id
 
-- [Module "REST service: Containerization"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/containerization/README.md)
-- [Module "REST service: Database & ORM"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/database-orm/README.md)
+POST <code>api/users</code> - to create record about new user and store it in database
 
-### Week 10
+PUT <code>api/users/${userId}</code> - to update existing user
 
-- [Module "REST service: Logging & Error handling"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/logging-error-handling/README.md)
-- [Module "REST service: Authentication & Authorization"](https://github.com/rolling-scopes-school/tasks/blob/master/node/modules/rest/authentication-jwt/README.md)
+DELETE <code>api/users/${userID}</code> - to delete existing user from database
+
+Interface User:
+
+- `id` — unique identifier (`string`, `uuid`) generated on server side
+- `username` — user's name (`string`, **required**)
+- `age` — user's age (`number`, **required**)
+- `hobbies` — user's hobbies (`array` of `strings` or empty `array`, **required**)
