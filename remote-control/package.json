@@ -1,0 +1,52 @@
+{
+  "name": "rsschool_nodejs_course",
+  "version": "1.0.0",
+  "description": "## Course goal",
+  "main": "./src/server.ts",
+  "scripts": {
+    "start:dev": "nodemon ./index.ts & nodemon ./src/ws_server/index.ts",
+    "start:prod": "ts-node index.ts & ts-node ./src/ws_server/index.ts ",
+    "lint": "eslint ./src --ext .js,.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaSkA6293/RSSchool_NodeJS_Course.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaSkA6293/RSSchool_NodeJS_Course/issues"
+  },
+  "homepage": "https://github.com/MaSkA6293/RSSchool_NodeJS_Course#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-typescript": "^7.18.6",
+    "@nut-tree/nut-js": "^2.3.0",
+    "@types/node": "^18.11.10",
+    "@types/webpack-dev-server": "^4.7.2",
+    "@types/ws": "^8.5.3",
+    "@typescript-eslint/eslint-plugin": "^5.31.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "babel-loader": "^9.1.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "eslint": "^8.28.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-webpack-plugin": "^3.2.0",
+    "nodemon": "^2.0.20",
+    "prettier": "^2.8.0",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.0",
+    "webpack-dev-server": "^4.11.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ws": "^8.11.0"
+  }
+}
