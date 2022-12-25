@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import * as dotenv from 'dotenv';
 import { EOL } from 'os';
+import moveMouse from '../utils/moveMouse';
 
 dotenv.config();
 
@@ -11,9 +12,11 @@ const wss = new WebSocketServer({ port: Number(port) });
 process.stdout.write(`WSS has been started on port ${port}${EOL}`);
 
 wss.on('connection', (ws) => {
-  ws.on('message', (data: string) => {
-    process.stdout.write(`received: %s ${data}`);
-  });
+  ws.on('message', async (data: string) => {
+    const [command, value] = data.toString().split(' ');
 
-  ws.send('something');
+    if (command.startsWith('mouse')) {
+      moveMouse(command.slice(6), Number(value));
+    }
+  });
 });

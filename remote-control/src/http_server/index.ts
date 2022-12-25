@@ -1,10 +1,14 @@
 import { readFile } from 'fs';
 import * as http from 'http';
+import path from 'path';
 
 const httpServer = http.createServer((req, res) => {
-  const filePath = `${__dirname}${
+  const dirname = path.resolve(path.dirname(''));
+
+  const filePath = `${dirname}${
     req.url === '/' ? '/front/index.html' : `/front${req.url}`
   }`;
+
   readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
