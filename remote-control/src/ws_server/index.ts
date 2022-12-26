@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import * as dotenv from 'dotenv';
 import { EOL } from 'os';
 import moveMouse from '../utils/moveMouse';
+import getPrintScreen from '../utils/printScreen';
 
 dotenv.config();
 
@@ -17,6 +18,10 @@ wss.on('connection', (ws) => {
 
     if (command.startsWith('mouse')) {
       moveMouse(command.slice(6), Number(value));
+    }
+    if (command === 'prnt_scrn') {
+      const image = await getPrintScreen();
+      ws.send(image);
     }
   });
 });
