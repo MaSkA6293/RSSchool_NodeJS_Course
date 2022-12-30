@@ -1,9 +1,7 @@
 import { WebSocketServer } from 'ws';
 import * as dotenv from 'dotenv';
 import { EOL } from 'os';
-import moveMouse from '../utils/moveMouse';
-import getPrintScreen from '../utils/printScreen';
-import drawMouse from '../utils/drawMouse';
+import * as utils from '../utils';
 
 dotenv.config();
 
@@ -16,16 +14,19 @@ process.stdout.write(`WSS has been started on port ${port}${EOL}`);
 wss.on('connection', (ws) => {
   ws.on('message', async (data: string) => {
     const [command, widthOrRadius, length] = data.toString().split(' ');
-
     if (command.startsWith('mouse')) {
-      moveMouse(command.slice(6), Number(widthOrRadius));
+      utils.moveMouse(command.slice(6), Number(widthOrRadius));
     }
     if (command === 'prnt_scrn') {
-      const image = await getPrintScreen();
+      const image = await utils.getPrintScreen();
       ws.send(image);
     }
     if (command.startsWith('draw')) {
-      drawMouse(command.slice(5), Number(widthOrRadius), Number(length));
+      utils.drawMouse(command.slice(5), Number(widthOrRadius), Number(length));
+    }
+    if (command.startsWith('mouse_position')) {
+      const coordinates = await utils.getMouseCoordinates();
+      ws.send(coordinates);
     }
   });
 });
