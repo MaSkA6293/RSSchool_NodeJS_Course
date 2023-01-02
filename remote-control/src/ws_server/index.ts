@@ -1,7 +1,7 @@
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, createWebSocketStream } from 'ws';
 import * as dotenv from 'dotenv';
 import { EOL } from 'os';
-import * as utils from '../utils';
+import messageHandler from '../utils/messageHandler';
 
 dotenv.config();
 
@@ -15,39 +15,36 @@ wss.on('listening', () =>
 
 wss.on('headers', (data) => {
   process.stdout.write(`\x1b[91mweb socket started ${EOL}`);
-  data.forEach((element) => {
+  data.forEach((element: string) => {
     process.stdout.write(`\x1b[33m${element} ${EOL}`);
   });
 });
 
 wss.on('connection', (ws) => {
-  ws.on('message', async (data: string) => {
-    const [command, widthOrRadius, length] = data.toString().split(' ');
+  try {
+    const duplex = createWebSocketStream(ws, {
+      encoding: 'utf8',
+      decodeStrings: false,
+    });
 
-    utils.printCommand(command, widthOrRadius, length);
+    duplex.on('readable', async () => {
+      let data = '';
+      let chunk = '';
+      while (chunk !== null) {
+        data += chunk;
+        chunk = duplex.read();
+      }
 
-    if (command.startsWith('mouse')) {
-      utils.moveMouse(command.slice(6), Number(widthOrRadius));
-    }
-    if (command === 'prnt_scrn') {
-      const image = await utils.getPrintScreen();
-      utils.printResult(image);
-      ws.send(image);
-    }
-    if (command.startsWith('draw')) {
-      utils.drawMouse(command.slice(5), Number(widthOrRadius), Number(length));
-    }
-    if (command.startsWith('mouse_position')) {
-      const coordinates = await utils.getMouseCoordinates();
-      utils.printResult(coordinates);
-      ws.send(coordinates);
-    }
-  });
+      await messageHandler(data, duplex);
+    });
 
-  ws.on('close', () => {
-    process.stdout.write(`\x1b[91m websocket closed ${EOL} ${EOL}`);
-    ws.close();
-  });
+    ws.on('close', () => {
+      process.stdout.write(`\x1b[91m websocket closed ${EOL} ${EOL}`);
+      duplex.destroy();
+    });
+  } catch {
+    process.stdout.write('Server error');
+  }
 });
 
 process.on('SIGINT', () => {
