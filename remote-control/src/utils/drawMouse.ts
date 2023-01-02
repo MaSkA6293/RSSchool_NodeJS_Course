@@ -36,6 +36,8 @@ const drawMouse = async (
 
   mouse.config.mouseSpeed = 500;
 
+  await mouse.pressButton(0);
+
   switch (command) {
     case 'square': {
       await drawRectangle(widthOrRadius, widthOrRadius);
@@ -51,6 +53,7 @@ const drawMouse = async (
     }
     default:
   }
+  await mouse.releaseButton(0);
 };
 
 export default drawMouse;

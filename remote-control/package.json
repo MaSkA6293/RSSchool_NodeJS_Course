@@ -5,7 +5,7 @@
   "main": "./src/server.ts",
   "scripts": {
     "start-front": "ts-node ./index.ts",
-    "start-back:dev": "nodemon ./src/ws_server/index.ts ",
+    "start": "nodemon ./src/ws_server/index.ts ",
     "lint": "eslint ./src --ext .js,.ts"
   },
   "repository": {
