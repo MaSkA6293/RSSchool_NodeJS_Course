@@ -1,8 +1,19 @@
-# CRUD API
+# Websocket Remote Control
 
 ## Description
 
-Simple CRUD API with in-memory database.
+The task is to implement remote control backend using `nutjs.dev` library and websocket.
+
+User interface for your remote control backend is [here](https://github.com/rolling-scopes-school/remote-control)
+
+The backend should be able to do the following:
+
+- Start websocket server
+- Handle websocket connection
+- Move mouse (Up, Down, Left, Right)
+- Draw circle, rectangle and square
+- Send current mouse coordinates
+- Send desktop capture (optionally)
 
 ## Technical requirements
 
@@ -12,64 +23,63 @@ Simple CRUD API with in-memory database.
 
 1. Install Node.js
 2. Clone this repository
-3. Switch branch <code>CRUD-api</code>
+3. Switch branch <code>remote-control</code>
 4. To install all dependencies use <code>npm install</code>
 
 ## Run the APP
 
-Development mode:
+- The program is started by npm script `start` in following way:
 
 ```bash
-npm run start:dev
+npm run start
 ```
 
-Production mode:
+- You also can run user interface using the command npm script `start-front` in following way:
 
 ```bash
-npm run start:prod
+npm run start-front
 ```
 
-Development mode with a load balancer:
+## List of websocket commands and their syntax (<- - cmd from frontend, -> - answer):
 
-```bash
-npm run start:multi-dev
-```
-
-Production mode with a load balancer:
-
-```bash
-npm run start start:multi
-```
-
-Run tests:
-
-```bash
-npm run test
-```
-
-Run ESlint
-
-```bash
-npm run lint
-```
-
-## API
-
-Endpoint: **api/users**
-
-GET <code>api/users</code> - to get all users records
-
-GET <code>api/users/${userId}</code> - to get user by Id
-
-POST <code>api/users</code> - to create record about new user and store it in database
-
-PUT <code>api/users/${userId}</code> - to update existing user
-
-DELETE <code>api/users/${userID}</code> - to delete existing user from database
-
-Interface User:
-
-- `id` — unique identifier (`string`, `uuid`) generated on server side
-- `username` — user's name (`string`, **required**)
-- `age` — user's age (`number`, **required**)
-- `hobbies` — user's hobbies (`array` of `strings` or empty `array`, **required**)
+- Navigation over the x and y axis
+  - Move mouse up
+  ```bash
+  <- mouse_up {y px}
+  ```
+  - Move mouse down
+  ```bash
+  <- mouse_down {y px}
+  ```
+  - Move mouse left
+  ```bash
+  <- mouse_left {x px}
+  ```
+  - Move mouse right
+  ```bash
+  <- mouse_right {x px}
+  ```
+  - Send mouse coordinates
+  ```bash
+  <- mouse_position
+  -> mouse_position {x px},{y px}
+  ```
+- Drawing
+  - Draw circle with pushed left button:
+  ```bash
+  <- draw_circle {px}
+  ```
+  - Draw rectangle with pushed left button:
+  ```bash
+  <- draw_rectangle {px} {px}
+  ```
+  - Draw square with pushed left button:
+  ```bash
+  <- draw_square {px}
+  ```
+- Print screen
+  - Make print screen command and send image (a base64 buffer of the 200 px square around the mouse position):
+  ```bash
+  <- prnt_scrn
+  -> prnt_scrn {base64 string (png buf)}
+  ```
