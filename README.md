@@ -47,6 +47,12 @@ Run tests:
 npm run test
 ```
 
+Scenario test are placed in:
+
+```
+ "./src/router/router-scenario.test.ts"
+```
+
 Run ESlint
 
 ```bash

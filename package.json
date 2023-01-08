@@ -1,7 +1,7 @@
 {
   "name": "rsschool_nodejs_course",
   "version": "1.0.0",
-  "description": "## Course goal",
+  "description": "CRUD API",
   "main": "./src/server.ts",
   "scripts": {
     "start:dev": "nodemon ./src/server.ts",
