@@ -38,7 +38,7 @@ npm run start:multi-dev
 Production mode with a load balancer:
 
 ```bash
-npm run start start:multi
+npm run start:multi
 ```
 
 Run tests:
