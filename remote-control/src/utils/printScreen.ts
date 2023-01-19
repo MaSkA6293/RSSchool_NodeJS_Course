@@ -49,7 +49,7 @@ const getPrintScreen = async (): Promise<string> => {
 
   await rm(filePath);
 
-  return `prnt_scrn ${Buffer.from(read).toString('base64')}`;
+  return Buffer.from(read).toString('base64');
 };
 
 export default getPrintScreen;
