@@ -1,25 +1,36 @@
-import { mouse, Point, screen } from '@nut-tree/nut-js';
+import { mouse, Point } from '@nut-tree/nut-js';
 
 import mouseMove from './moveMouse';
 
 const drawRectangle = async (width: number, length: number): Promise<void> => {
+  await mouse.pressButton(0);
   await mouseMove('right', length);
   await mouseMove('down', width);
   await mouseMove('left', length);
   await mouseMove('up', width);
 };
 
-const drawCircle = async (
-  radius: number,
-  screenWidth: number,
-  screenHeight: number
-) => {
-  for (let i = 180; i > -180; i -= 0.03) {
-    const x = radius * Math.sin((Math.PI * 2 * i) / 360);
-    const y = radius * Math.cos((Math.PI * 2 * i) / 360);
-    mouse.setPosition(new Point(x + screenWidth / 2, y + screenHeight / 2));
+const getNextPointCoordinates = (radius: number, i: number) => {
+  const pointX = radius * Math.sin((Math.PI * 2 * i) / 360);
+  const pointY = radius * Math.cos((Math.PI * 2 * i) / 360);
+  return { pointX, pointY };
+};
+
+const drawCircle = async (radius: number) => {
+  const { x, y } = await mouse.getPosition();
+
+  const firstPoint = getNextPointCoordinates(radius, 180);
+
+  mouse.setPosition(new Point(x + firstPoint.pointX, y + firstPoint.pointY));
+
+  await mouse.pressButton(0);
+
+  for (let i = 180; i > -180; i -= 0.05) {
+    const coordinates = getNextPointCoordinates(radius, i);
+    mouse.setPosition(
+      new Point(x + coordinates.pointX, y + coordinates.pointY)
+    );
   }
-  await mouse.setPosition(new Point(screenWidth / 2, screenHeight / 2));
 };
 
 const drawMouse = async (
@@ -27,16 +38,7 @@ const drawMouse = async (
   widthOrRadius: number,
   length: number
 ) => {
-  const [screenHeight, screenWidth] = await Promise.all([
-    screen.height(),
-    screen.width(),
-  ]);
-
-  await mouse.setPosition(new Point(screenWidth / 2, screenHeight / 2));
-
-  mouse.config.mouseSpeed = 500;
-
-  await mouse.pressButton(0);
+  mouse.config.mouseSpeed = 300;
 
   switch (command) {
     case 'square': {
@@ -48,7 +50,7 @@ const drawMouse = async (
       break;
     }
     case 'circle': {
-      await drawCircle(widthOrRadius, screenWidth, screenHeight);
+      await drawCircle(widthOrRadius);
       break;
     }
     default:
