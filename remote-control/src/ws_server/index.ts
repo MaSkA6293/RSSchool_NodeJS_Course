@@ -38,6 +38,8 @@ wss.on('connection', (ws) => {
       decodeStrings: false,
     });
 
+    duplex.write(`connection_is_on_localhost:${WS_PORT}`);
+
     duplex.on('readable', async () => {
       let data = '';
       let chunk = '';
@@ -45,10 +47,15 @@ wss.on('connection', (ws) => {
         data += chunk;
         chunk = duplex.read();
       }
+      if (data) {
+        process.stdout.write(`\x1b[34mWS received the command ${data} ${EOL}`);
+      }
 
-      process.stdout.write(`\x1b[34mWS received the command ${data} ${EOL}`);
       const message = await messageHandler(data, duplex);
-      process.stdout.write(`\x1b[96mWS send the command ${message} ${EOL}`);
+
+      if (message) {
+        process.stdout.write(`\x1b[96mWS send the command ${message} ${EOL}`);
+      }
     });
 
     ws.on('close', () => {
