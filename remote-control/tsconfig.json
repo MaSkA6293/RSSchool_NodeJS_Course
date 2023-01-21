@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "types": ["node", "jest"],
     "module": "CommonJS",
     "target": "es5",
     "esModuleInterop": true,
@@ -14,5 +13,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true
-  }
+  },
+  "exclude": ["node_modules", "dist"]
 }

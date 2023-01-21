@@ -28,16 +28,16 @@ The backend should be able to do the following:
 
 ## Run the APP
 
-- The program is started by npm script `start` in following way:
+- The program is started in production mode by npm script `start` in following way:
 
 ```bash
 npm run start
 ```
 
-- You also can run user interface using the command npm script `start-front` in following way:
+- To start program in development mode use the command npm script `start:dev` in following way:
 
 ```bash
-npm run start-front
+npm run start:dev
 ```
 
 ## List of websocket commands and their syntax (<- - cmd from frontend, -> - answer):

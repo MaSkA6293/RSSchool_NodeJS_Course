@@ -2,15 +2,24 @@ import { WebSocketServer, createWebSocketStream } from 'ws';
 import * as dotenv from 'dotenv';
 import { EOL } from 'os';
 import messageHandler from '../utils/messageHandler';
+import httpServer from '../http_server/index';
 
 dotenv.config();
 
-const port = process.env.PORT ? process.env.PORT : 8080;
+const WS_PORT = 8080;
 
-const wss = new WebSocketServer({ port: Number(port) });
+const HTTP_PORT = 8181;
+
+process.stdout.write(
+  `Start static http server on the ${HTTP_PORT} port!${EOL}`
+);
+
+httpServer.listen(HTTP_PORT);
+
+const wss = new WebSocketServer({ port: WS_PORT });
 
 wss.on('listening', () =>
-  process.stdout.write(`\x1b[36mWS server started on port ${port}${EOL}`)
+  process.stdout.write(`\x1b[36mWS server started on port ${WS_PORT}${EOL}`)
 );
 
 wss.on('headers', (data) => {
