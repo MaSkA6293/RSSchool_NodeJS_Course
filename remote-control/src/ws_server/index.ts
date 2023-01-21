@@ -11,7 +11,7 @@ const WS_PORT = 8080;
 const HTTP_PORT = 8181;
 
 process.stdout.write(
-  `Start static http server on the ${HTTP_PORT} port!${EOL}`
+  `\x1b[36mhttp server started on http://localhost:${HTTP_PORT}${EOL}`
 );
 
 httpServer.listen(HTTP_PORT);
@@ -19,7 +19,9 @@ httpServer.listen(HTTP_PORT);
 const wss = new WebSocketServer({ port: WS_PORT });
 
 wss.on('listening', () =>
-  process.stdout.write(`\x1b[36mWS server started on port ${WS_PORT}${EOL}`)
+  process.stdout.write(
+    `\x1b[36mWS server started on http://localhost:${WS_PORT}${EOL}`
+  )
 );
 
 wss.on('headers', (data) => {
@@ -45,11 +47,12 @@ wss.on('connection', (ws) => {
       }
 
       process.stdout.write(`\x1b[34mWS received the command ${data} ${EOL}`);
-      await messageHandler(data, duplex);
+      const message = await messageHandler(data, duplex);
+      process.stdout.write(`\x1b[96mWS send the command ${message} ${EOL}`);
     });
 
     ws.on('close', () => {
-      process.stdout.write(`\x1b[91m websocket closed ${EOL} ${EOL}`);
+      process.stdout.write(`\x1b[91mwebsocket closed ${EOL} ${EOL}`);
       duplex.destroy();
     });
   } catch {

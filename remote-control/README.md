@@ -24,7 +24,8 @@ The backend should be able to do the following:
 1. Install Node.js
 2. Clone this repository
 3. Switch branch <code>remote-control</code>
-4. To install all dependencies use <code>npm install</code>
+4. Go to remote-control folder
+5. To install all dependencies use <code>npm install</code>
 
 ## Run the APP
 
