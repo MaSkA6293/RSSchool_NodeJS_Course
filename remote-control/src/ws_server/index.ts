@@ -44,6 +44,7 @@ wss.on('connection', (ws) => {
         chunk = duplex.read();
       }
 
+      process.stdout.write(`\x1b[34mWS received the command ${data} ${EOL}`);
       await messageHandler(data, duplex);
     });
 
