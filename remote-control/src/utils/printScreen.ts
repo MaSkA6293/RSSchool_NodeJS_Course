@@ -1,8 +1,5 @@
-import { readFile, rm } from 'fs/promises';
-import { screen, Region, mouse, FileType } from '@nut-tree/nut-js';
-
-const pathToFileDestination = './src/ws_server';
-const filePath = `${pathToFileDestination}/image.png`;
+import { screen, Region, mouse } from '@nut-tree/nut-js';
+import Jimp from 'jimp';
 
 const checkBoundaryValue = (value: number, max: number) => {
   if (value - 100 < 0) return 0;
@@ -38,18 +35,15 @@ const getPrintScreen = async (): Promise<string> => {
     screenWidth
   );
 
-  await screen.captureRegion(
-    'image',
-    new Region(x, y, 200, 200),
-    FileType.PNG,
-    pathToFileDestination
-  );
+  const screenShot = await screen.grabRegion(new Region(x, y, 200, 200));
 
-  const read = await readFile(filePath);
+  const screenShotRgb = await screenShot.toRGB();
 
-  await rm(filePath);
+  const jimpImage = new Jimp({ ...screenShotRgb });
 
-  return Buffer.from(read).toString('base64');
+  const base64buffer = await jimpImage.getBufferAsync(Jimp.MIME_PNG);
+
+  return base64buffer.toString('base64');
 };
 
 export default getPrintScreen;
