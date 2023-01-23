@@ -7,7 +7,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 const config: Configuration = {
   target: 'node',
-  entry: './src/ws_server/index.ts',
+  entry: './src/index.ts',
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
