@@ -80,7 +80,7 @@ export const queryType = new GraphQLObjectType({
       },
     },
     getMemberTypeById: {
-      type: postType,
+      type: memberType,
       args: {
         id: {
           description: 'member type id',
