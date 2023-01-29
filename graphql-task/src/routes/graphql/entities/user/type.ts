@@ -178,3 +178,24 @@ export const userCreateInputType = new GraphQLInputObjectType({
     },
   },
 });
+
+export const userUpdateInputType = new GraphQLInputObjectType({
+  name: 'userUpdate',
+  fields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    firstName: {
+      type: GraphQLString,
+    },
+    lastName: {
+      type: GraphQLString,
+    },
+    email: {
+      type: GraphQLString,
+    },
+    subscribedToUserIds: {
+      type: new GraphQLList(GraphQLString),
+    },
+  },
+});

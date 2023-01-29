@@ -131,3 +131,19 @@ export const userCreate = async (
   });
   return result.json();
 };
+
+export const userUpdate = async (
+  id: string,
+  update: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    subscribedToUserIds?: string[];
+  },
+  { fastify }: any
+): Promise<any> => {
+  console.log(id);
+  console.log(update);
+  const result = await fastify.db.users.change(id, update);
+  return result;
+};

@@ -22,6 +22,7 @@ import {
   getAllSubscribedProfiles,
   getAllSubscribedPosts,
   userCreate,
+  userUpdate,
 } from './user/resolver';
 import { profileCreate } from './profile/resolver';
 import { postGetAll, postGetById, postCreate } from './post/resolver';
@@ -173,6 +174,42 @@ export const mutationType = new GraphQLObjectType({
       },
       resolve: async (_source, args, contextValue) => {
         return await postCreate(args, contextValue);
+      },
+    },
+
+    updateUser: {
+      type: userType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        firstName: {
+          type: GraphQLString,
+        },
+        lastName: {
+          type: GraphQLString,
+        },
+        email: {
+          type: GraphQLString,
+        },
+        subscribedToUserIds: {
+          type: new GraphQLList(GraphQLString),
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const { id } = args;
+        const keys = Object.keys(args);
+
+        let update = {};
+
+        keys.forEach((fieldName) => {
+          const has = args.hasOwnProperty(fieldName);
+          if (has) {
+            update = { ...update, [fieldName]: args[fieldName] };
+          }
+        });
+
+        return await userUpdate(id, update, contextValue);
       },
     },
   }),
