@@ -115,6 +115,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
       });
 
       if (user) {
+        if (user.subscribedToUserIds.includes(id)) return user;
         const modifiedUser = {
           ...user,
           subscribedToUserIds: [...user.subscribedToUserIds, id],

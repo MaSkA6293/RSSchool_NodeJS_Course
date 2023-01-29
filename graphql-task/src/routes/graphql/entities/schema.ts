@@ -33,6 +33,8 @@ import {
   getAllSubscribedPosts,
   userCreate,
   userUpdate,
+  subscribeTo,
+  unsubscribeFrom,
 } from './user/resolver';
 import {
   postGetAll,
@@ -280,6 +282,50 @@ export const mutationType = new GraphQLObjectType({
         const { id }: { id: string } = args;
         const update = getUpdateObject(args);
         return await memberTypeUpdate(id, update, contextValue);
+      },
+    },
+
+    subscribeTo: {
+      type: userType,
+      args: {
+        userId: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'the id of the user',
+        },
+        subscribeToId: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'the id of the subscribeTo user',
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const {
+          userId,
+          subscribeToId,
+        }: { userId: string; subscribeToId: string } = args;
+
+        return await subscribeTo(userId, subscribeToId, contextValue);
+      },
+    },
+
+    unsubscribeFrom: {
+      type: userType,
+      args: {
+        userId: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'the id of the user',
+        },
+        unsubscribeFromId: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'the id of the unsubscribe user',
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const {
+          userId,
+          unsubscribeFromId,
+        }: { userId: string; unsubscribeFromId: string } = args;
+
+        return await unsubscribeFrom(userId, unsubscribeFromId, contextValue);
       },
     },
   }),

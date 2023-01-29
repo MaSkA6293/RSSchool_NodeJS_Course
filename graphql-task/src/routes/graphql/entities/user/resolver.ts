@@ -144,3 +144,37 @@ export const userUpdate = async (
 ): Promise<any> => {
   return await fastify.db.users.change(id, update);
 };
+
+export const subscribeTo = async (
+  userId: string,
+  subscribeToId: string,
+  { fastify }: any
+): Promise<any> => {
+  const result = await fastify.inject({
+    method: 'POST',
+    url: `users/${subscribeToId}/subscribeTo`,
+    body: { userId },
+  });
+  if (result.statusCode === 400)
+    throw new Error(
+      'Bad request, check data. Probably with ID=userId does not exist'
+    );
+  return result.json();
+};
+
+export const unsubscribeFrom = async (
+  userId: string,
+  unsubscribeFromId: string,
+  { fastify }: any
+): Promise<any> => {
+  const result = await fastify.inject({
+    method: 'POST',
+    url: `users/${unsubscribeFromId}/unsubscribeFrom`,
+    body: { userId },
+  });
+  if (result.statusCode === 400)
+    throw new Error(
+      'Bad request, check data. Probably with ID=userId does not exist, or this user does not have subscription = unsubscribeFromId'
+    );
+  return result.json();
+};
