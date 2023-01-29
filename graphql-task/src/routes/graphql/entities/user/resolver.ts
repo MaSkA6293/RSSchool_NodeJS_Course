@@ -3,6 +3,7 @@ import { PostEntity } from '../../../../utils/DB/entities/DBPosts';
 import { ProfileEntity } from '../../../../utils/DB/entities/DBProfiles';
 import { MemberTypeEntity } from '../../../../utils/DB/entities/DBMemberTypes';
 import { profileGetAll } from '../profile/resolver';
+import { postGetAll } from '../post/resolver';
 
 export const userGetAll = async ({
   fastify,
@@ -93,4 +94,24 @@ export const getAllSubscribedProfiles = async ({
 
     return { ...user, subscribedToUserIds: subscribedToUserProfiles };
   });
+};
+
+export const getAllSubscribedPosts = async (
+  { id }: { id: string },
+  {
+    fastify,
+  }: {
+    fastify: any;
+  }
+): Promise<any> => {
+  const user: UserEntity | null = await userGetById({ id }, { fastify });
+
+  const posts = await postGetAll({ fastify });
+  if (user) {
+    const subscribedToUserPosts = posts.filter((post: PostEntity) =>
+      user.subscribedToUserIds.includes(post.userId)
+    );
+
+    return { ...user, subscribedToUserIds: subscribedToUserPosts };
+  }
 };
