@@ -1,4 +1,9 @@
-import { GraphQLString, GraphQLNonNull, GraphQLObjectType } from 'graphql';
+import {
+  GraphQLString,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLInputObjectType,
+} from 'graphql';
 
 export const postType = new GraphQLObjectType({
   name: 'Post',
@@ -21,4 +26,13 @@ export const postType = new GraphQLObjectType({
       description: 'The id of the of the user.',
     },
   }),
+});
+
+export const postCreateInputType = new GraphQLInputObjectType({
+  name: 'prostCreate',
+  fields: {
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    content: { type: new GraphQLNonNull(GraphQLString) },
+    userId: { type: new GraphQLNonNull(GraphQLString) },
+  },
 });

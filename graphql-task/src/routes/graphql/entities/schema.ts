@@ -24,7 +24,7 @@ import {
   userCreate,
 } from './user/resolver';
 import { profileCreate } from './profile/resolver';
-import { postGetAll, postGetById } from './post/resolver';
+import { postGetAll, postGetById, postCreate } from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
 import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
 
@@ -144,6 +144,7 @@ export const mutationType = new GraphQLObjectType({
         return await userCreate(args, contextValue);
       },
     },
+
     createProfile: {
       type: profileType,
       args: {
@@ -160,6 +161,18 @@ export const mutationType = new GraphQLObjectType({
       },
       resolve: async (_source, args, contextValue) => {
         return await profileCreate(args, contextValue);
+      },
+    },
+
+    createPost: {
+      type: postType,
+      args: {
+        title: { type: new GraphQLNonNull(GraphQLString) },
+        content: { type: new GraphQLNonNull(GraphQLString) },
+        userId: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (_source, args, contextValue) => {
+        return await postCreate(args, contextValue);
       },
     },
   }),

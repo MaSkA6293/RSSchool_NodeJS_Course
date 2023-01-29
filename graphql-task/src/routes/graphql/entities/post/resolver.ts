@@ -19,3 +19,14 @@ export const postGetById = async (
   if (result.statusCode === 200) return result.json();
   return null;
 };
+
+export const postCreate = async (
+  args: {
+    title: string;
+    content: string;
+    userId: string;
+  },
+  { fastify }: any
+): Promise<any> => {
+  return await fastify.db.posts.create({ ...args });
+};
