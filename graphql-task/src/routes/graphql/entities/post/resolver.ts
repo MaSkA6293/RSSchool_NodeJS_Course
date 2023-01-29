@@ -30,3 +30,14 @@ export const postCreate = async (
 ): Promise<any> => {
   return await fastify.db.posts.create({ ...args });
 };
+
+export const postUpdate = async (
+  id: string,
+  update: {
+    title?: string;
+    content?: string;
+  },
+  { fastify }: any
+): Promise<any> => {
+  return await fastify.db.posts.change(id, update);
+};

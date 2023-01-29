@@ -25,7 +25,12 @@ import {
   userUpdate,
 } from './user/resolver';
 import { profileCreate, profileUpdate } from './profile/resolver';
-import { postGetAll, postGetById, postCreate } from './post/resolver';
+import {
+  postGetAll,
+  postGetById,
+  postCreate,
+  postUpdate,
+} from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
 import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
 import { getUpdateObject } from '../utils';
@@ -225,6 +230,22 @@ export const mutationType = new GraphQLObjectType({
         const { id }: { id: string } = args;
         const update = getUpdateObject(args);
         return await profileUpdate(id, update, contextValue);
+      },
+    },
+
+    updatePost: {
+      type: postType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        title: { type: GraphQLString },
+        content: { type: GraphQLString },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const { id }: { id: string } = args;
+        const update = getUpdateObject(args);
+        return await postUpdate(id, update, contextValue);
       },
     },
   }),
