@@ -14,7 +14,7 @@ import {
 } from './user/type';
 import { postType } from './post/type';
 import { profileType } from './profile/type';
-import { memberType } from './member-type/type';
+import { memberType, memberTypeUpdateInputType } from './member-type/type';
 
 import {
   userGetAll,
@@ -24,15 +24,23 @@ import {
   userCreate,
   userUpdate,
 } from './user/resolver';
-import { profileCreate, profileUpdate } from './profile/resolver';
 import {
   postGetAll,
   postGetById,
   postCreate,
   postUpdate,
 } from './post/resolver';
-import { profileGetAll, getProfileById } from './profile/resolver';
-import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
+import {
+  profileGetAll,
+  getProfileById,
+  profileCreate,
+  profileUpdate,
+} from './profile/resolver';
+import {
+  memberTypeGetAll,
+  memberTypeGetById,
+  memberTypeUpdate,
+} from './member-type/resolver';
 import { getUpdateObject } from '../utils';
 
 export const queryType = new GraphQLObjectType({
@@ -248,6 +256,22 @@ export const mutationType = new GraphQLObjectType({
         return await postUpdate(id, update, contextValue);
       },
     },
+
+    updateMemberType: {
+      type: memberType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        discount: { type: GraphQLInt },
+        monthPostsLimit: { type: GraphQLInt },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const { id }: { id: string } = args;
+        const update = getUpdateObject(args);
+        return await memberTypeUpdate(id, update, contextValue);
+      },
+    },
   }),
 });
 
@@ -261,5 +285,6 @@ export const rootSchema: GraphQLSchema = new GraphQLSchema({
     memberType,
     userWithSubscribedToProfileType,
     userWithSubscribedToPostsType,
+    memberTypeUpdateInputType,
   ],
 });

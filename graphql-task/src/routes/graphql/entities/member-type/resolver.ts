@@ -21,3 +21,14 @@ export const memberTypeGetById = async (
   if (result.statusCode === 200) return result.json();
   return null;
 };
+
+export const memberTypeUpdate = async (
+  id: string,
+  update: {
+    discount?: number;
+    monthPostsLimit?: number;
+  },
+  { fastify }: any
+): Promise<any> => {
+  return await fastify.db.memberTypes.change(id, update);
+};
