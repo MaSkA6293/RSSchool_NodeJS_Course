@@ -4,6 +4,7 @@ import {
   GraphQLList,
   GraphQLNonNull,
   GraphQLString,
+  GraphQLInt,
 } from 'graphql';
 
 import {
@@ -22,6 +23,7 @@ import {
   getAllSubscribedPosts,
   userCreate,
 } from './user/resolver';
+import { profileCreate } from './profile/resolver';
 import { postGetAll, postGetById } from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
 import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
@@ -140,6 +142,24 @@ export const mutationType = new GraphQLObjectType({
       },
       resolve: async (_source, args, contextValue) => {
         return await userCreate(args, contextValue);
+      },
+    },
+    createProfile: {
+      type: profileType,
+      args: {
+        avatar: { type: new GraphQLNonNull(GraphQLString) },
+        sex: { type: new GraphQLNonNull(GraphQLString) },
+        birthday: { type: new GraphQLNonNull(GraphQLInt) },
+        country: { type: new GraphQLNonNull(GraphQLString) },
+        street: { type: new GraphQLNonNull(GraphQLString) },
+        city: { type: new GraphQLNonNull(GraphQLString) },
+        userId: { type: new GraphQLNonNull(GraphQLString) },
+        memberTypeId: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        return await profileCreate(args, contextValue);
       },
     },
   }),

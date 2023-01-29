@@ -21,3 +21,19 @@ export const getProfileById = async (
   if (result.statusCode === 200) return result.json();
   return null;
 };
+
+export const profileCreate = async (
+  args: {
+    avatar: string;
+    sex: string;
+    birthday: number;
+    country: string;
+    street: string;
+    city: string;
+    userId: string;
+    memberTypeId: string;
+  },
+  { fastify }: any
+): Promise<any> => {
+  return await fastify.db.profiles.create({ ...args });
+};
