@@ -37,3 +37,19 @@ export const profileCreate = async (
 ): Promise<any> => {
   return await fastify.db.profiles.create({ ...args });
 };
+
+export const profileUpdate = async (
+  id: string,
+  update: {
+    avatar?: string;
+    sex?: string;
+    birthday?: number;
+    country?: string;
+    street?: string;
+    city?: string;
+    memberTypeId?: string;
+  },
+  { fastify }: any
+): Promise<any> => {
+  return await fastify.db.profiles.change(id, update);
+};

@@ -64,3 +64,22 @@ export const profileCreateInputType = new GraphQLInputObjectType({
     },
   },
 });
+
+export const profileUpdateInputType = new GraphQLInputObjectType({
+  name: 'profileUpdate',
+  fields: {
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    avatar: { type: GraphQLString },
+    sex: { type: GraphQLString },
+    birthday: { type: GraphQLInt },
+    country: { type: GraphQLString },
+    street: { type: GraphQLString },
+    city: { type: GraphQLString },
+    userId: { type: GraphQLString },
+    memberTypeId: {
+      type: GraphQLString,
+    },
+  },
+});

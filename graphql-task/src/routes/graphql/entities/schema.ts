@@ -24,10 +24,11 @@ import {
   userCreate,
   userUpdate,
 } from './user/resolver';
-import { profileCreate } from './profile/resolver';
+import { profileCreate, profileUpdate } from './profile/resolver';
 import { postGetAll, postGetById, postCreate } from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
 import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
+import { getUpdateObject } from '../utils';
 
 export const queryType = new GraphQLObjectType({
   name: 'Query',
@@ -197,19 +198,33 @@ export const mutationType = new GraphQLObjectType({
         },
       },
       resolve: async (_source, args, contextValue) => {
-        const { id } = args;
-        const keys = Object.keys(args);
-
-        let update = {};
-
-        keys.forEach((fieldName) => {
-          const has = args.hasOwnProperty(fieldName);
-          if (has) {
-            update = { ...update, [fieldName]: args[fieldName] };
-          }
-        });
+        const { id }: { id: string } = args;
+        const update = getUpdateObject(args);
 
         return await userUpdate(id, update, contextValue);
+      },
+    },
+
+    updateProfile: {
+      type: profileType,
+      args: {
+        id: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        avatar: { type: GraphQLString },
+        sex: { type: GraphQLString },
+        birthday: { type: GraphQLInt },
+        country: { type: GraphQLString },
+        street: { type: GraphQLString },
+        city: { type: GraphQLString },
+        memberTypeId: {
+          type: GraphQLString,
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        const { id }: { id: string } = args;
+        const update = getUpdateObject(args);
+        return await profileUpdate(id, update, contextValue);
       },
     },
   }),

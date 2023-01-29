@@ -142,8 +142,5 @@ export const userUpdate = async (
   },
   { fastify }: any
 ): Promise<any> => {
-  console.log(id);
-  console.log(update);
-  const result = await fastify.db.users.change(id, update);
-  return result;
+  return await fastify.db.users.change(id, update);
 };
