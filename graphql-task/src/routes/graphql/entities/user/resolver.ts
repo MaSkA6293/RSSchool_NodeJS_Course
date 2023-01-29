@@ -2,6 +2,7 @@ import { UserEntity } from '../../../../utils/DB/entities/DBUsers';
 import { PostEntity } from '../../../../utils/DB/entities/DBPosts';
 import { ProfileEntity } from '../../../../utils/DB/entities/DBProfiles';
 import { MemberTypeEntity } from '../../../../utils/DB/entities/DBMemberTypes';
+import { profileGetAll } from '../profile/resolver';
 
 export const userGetAll = async ({
   fastify,
@@ -74,4 +75,22 @@ export const userGetUsersMemberTypes = async (
   const memberTypesData = await Promise.all(allUsersMemberTypes);
 
   return memberTypesData.map((el) => el.json());
+};
+
+export const getAllSubscribedProfiles = async ({
+  fastify,
+}: {
+  fastify: any;
+}): Promise<any> => {
+  const users = await userGetAll({ fastify });
+
+  const profiles = await profileGetAll({ fastify });
+
+  return users.map((user: UserEntity) => {
+    const subscribedToUserProfiles = profiles.filter((profile: ProfileEntity) =>
+      user.subscribedToUserIds.includes(profile.userId)
+    );
+
+    return { ...user, subscribedToUserIds: subscribedToUserProfiles };
+  });
 };

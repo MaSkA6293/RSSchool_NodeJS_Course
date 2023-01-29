@@ -121,8 +121,6 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     await Promise.all(createPosts);
 
     const createProfiles = profiles.map(async (el, i) => {
-      await fastify.db.profiles.create(el);
-
       if (i < 2) {
         return await fastify.db.profiles.create({
           ...el,
@@ -137,13 +135,15 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     });
     await Promise.all(createProfiles);
 
-    const subscribe = userData.map(
-      async (el: UserEntity, i) =>
-        await fastify.db.users.change(el.id, {
-          ...el,
-          subscribedToUserIds: users[i].subscribedToUserIds,
-        })
-    );
+    const subscribe = userData.map(async (el: UserEntity, i, arr) => {
+      return await fastify.db.users.change(el.id, {
+        ...el,
+        subscribedToUserIds: [
+          ...el.subscribedToUserIds,
+          arr[arr.length - i - 1].id,
+        ],
+      });
+    });
 
     await Promise.all(subscribe);
     return 'the fake db was successfully created';

@@ -6,12 +6,16 @@ import {
   GraphQLString,
 } from 'graphql';
 
-import { userType } from './user/type';
+import { userType, userWithSubscribedToProfileType } from './user/type';
 import { postType } from './post/type';
 import { profileType } from './profile/type';
 import { memberType } from './member-type/type';
 
-import { userGetAll, userGetById } from './user/resolver';
+import {
+  userGetAll,
+  userGetById,
+  getAllSubscribedProfiles,
+} from './user/resolver';
 import { postGetAll, postGetById } from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
 import { memberTypeGetAll, memberTypeGetById } from './member-type/resolver';
@@ -91,10 +95,22 @@ export const queryType = new GraphQLObjectType({
         return await memberTypeGetById(args, contextValue);
       },
     },
+    userSubscribedToWithProfile: {
+      type: new GraphQLList(userWithSubscribedToProfileType),
+      resolve: async (_source, args, contextValue) => {
+        return await getAllSubscribedProfiles(contextValue);
+      },
+    },
   }),
 });
 
 export const rootSchema: GraphQLSchema = new GraphQLSchema({
   query: queryType,
-  types: [userType, postType, profileType, memberType],
+  types: [
+    userType,
+    postType,
+    profileType,
+    memberType,
+    userWithSubscribedToProfileType,
+  ],
 });
