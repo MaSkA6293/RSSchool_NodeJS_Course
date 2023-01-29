@@ -11,9 +11,19 @@ import {
   userType,
   userWithSubscribedToProfileType,
   userWithSubscribedToPostsType,
+  userCreateInputType,
+  userUpdateInputType,
 } from './user/type';
-import { postType } from './post/type';
-import { profileType } from './profile/type';
+import {
+  postType,
+  postCreateInputType,
+  postUpdateInputType,
+} from './post/type';
+import {
+  profileType,
+  profileCreateInputType,
+  profileUpdateInputType,
+} from './profile/type';
 import { memberType, memberTypeUpdateInputType } from './member-type/type';
 
 import {
@@ -285,6 +295,12 @@ export const rootSchema: GraphQLSchema = new GraphQLSchema({
     memberType,
     userWithSubscribedToProfileType,
     userWithSubscribedToPostsType,
+    userCreateInputType,
+    userUpdateInputType,
     memberTypeUpdateInputType,
+    postCreateInputType,
+    postUpdateInputType,
+    profileCreateInputType,
+    profileUpdateInputType,
   ],
 });
