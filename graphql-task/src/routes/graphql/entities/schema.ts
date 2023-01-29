@@ -20,6 +20,7 @@ import {
   userGetById,
   getAllSubscribedProfiles,
   getAllSubscribedPosts,
+  userCreate,
 } from './user/resolver';
 import { postGetAll, postGetById } from './post/resolver';
 import { profileGetAll, getProfileById } from './profile/resolver';
@@ -121,8 +122,32 @@ export const queryType = new GraphQLObjectType({
   }),
 });
 
+export const mutationType = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: () => ({
+    createUser: {
+      type: userType,
+      args: {
+        firstName: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        lastName: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+        email: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve: async (_source, args, contextValue) => {
+        return await userCreate(args, contextValue);
+      },
+    },
+  }),
+});
+
 export const rootSchema: GraphQLSchema = new GraphQLSchema({
   query: queryType,
+  mutation: mutationType,
   types: [
     userType,
     postType,

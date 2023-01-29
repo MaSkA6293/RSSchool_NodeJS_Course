@@ -3,6 +3,7 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLList,
+  GraphQLInputObjectType,
 } from 'graphql';
 import { memberType } from '../member-type/type';
 import { postType } from '../post/type';
@@ -161,4 +162,19 @@ export const userWithSubscribedToPostsType = new GraphQLObjectType({
       },
     },
   }),
+});
+
+export const userCreateInputType = new GraphQLInputObjectType({
+  name: 'userCreate',
+  fields: {
+    firstName: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    lastName: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+    email: {
+      type: new GraphQLNonNull(GraphQLString),
+    },
+  },
 });

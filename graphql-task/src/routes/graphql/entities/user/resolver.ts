@@ -115,3 +115,19 @@ export const getAllSubscribedPosts = async (
     return { ...user, subscribedToUserIds: subscribedToUserPosts };
   }
 };
+
+export const userCreate = async (
+  args: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  },
+  { fastify }: any
+): Promise<UserEntity[] | []> => {
+  const result = await fastify.inject({
+    method: 'POST',
+    url: '/users',
+    body: { ...args },
+  });
+  return result.json();
+};
