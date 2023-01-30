@@ -20,7 +20,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 
       let documentAST: DocumentNode;
 
-      const DEPTH_LIMIT = 2;
+      const DEPTH_LIMIT = 5;
 
       try {
         documentAST = parse(new Source(String(query)));

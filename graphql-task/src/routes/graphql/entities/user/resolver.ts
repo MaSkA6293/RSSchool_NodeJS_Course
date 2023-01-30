@@ -198,3 +198,34 @@ export const unsubscribeFrom = async (
     );
   return result.json();
 };
+
+export const getAllSubscribedToUserUser = async ({
+  fastify,
+}: {
+  fastify: any;
+}): Promise<any> => {
+  const users: UserEntity[] = await userGetAll({ fastify });
+
+  return users.map((user) => {
+    const subscribedToUserUser = users.filter((el) => {
+      if (user.subscribedToUserIds.includes(el.id)) return true;
+    });
+    return { ...user, subscribedToUserUser: subscribedToUserUser };
+  });
+};
+
+export const getAllSubscribedToUserUserByID = async (
+  { user }: { user: UserEntity },
+  {
+    fastify,
+  }: {
+    fastify: any;
+  }
+): Promise<any> => {
+  const users: UserEntity[] = await userGetAll({ fastify });
+
+  const subscribedToUserUser = users.filter((el) => {
+    if (user.subscribedToUserIds.includes(el.id)) return true;
+  });
+  return { ...user, subscribedToUserUser: subscribedToUserUser };
+};

@@ -13,6 +13,7 @@ import {
   userByIdWithSubscribedToUserPostsType,
   userCreateInputType,
   userUpdateInputType,
+  userCheckDepthType,
 } from './user/type';
 import {
   postType,
@@ -35,6 +36,7 @@ import {
   userUpdate,
   subscribeTo,
   unsubscribeFrom,
+  getAllSubscribedToUserUser,
 } from './user/resolver';
 import {
   postGetAll,
@@ -146,6 +148,13 @@ export const queryType = new GraphQLObjectType({
       },
       resolve: async (_source, args, contextValue) => {
         return await getAllSubscribedToUserPosts(args, contextValue);
+      },
+    },
+    checkDepth: {
+      type: new GraphQLList(userCheckDepthType),
+      resolve: async (_source, args, contextValue) => {
+        const result = await getAllSubscribedToUserUser(contextValue);
+        return result;
       },
     },
   }),
@@ -348,5 +357,6 @@ export const rootSchema: GraphQLSchema = new GraphQLSchema({
     postUpdateInputType,
     profileCreateInputType,
     profileUpdateInputType,
+    userCheckDepthType,
   ],
 });

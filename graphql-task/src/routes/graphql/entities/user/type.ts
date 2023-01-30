@@ -12,6 +12,7 @@ import {
   userGetUsersPosts,
   userGetUsersProfiles,
   userGetUsersMemberTypes,
+  getAllSubscribedToUserUser,
 } from './resolver';
 
 export const userType = new GraphQLObjectType({
@@ -167,6 +168,28 @@ export const userByIdWithSubscribedToUserPostsType = new GraphQLObjectType({
       description: 'subscribed To User Posts',
       resolve: async (user, _source, contextValue) => {
         return user.subscribedToUserPosts;
+      },
+    },
+  }),
+});
+
+export const userCheckDepthType: any = new GraphQLObjectType({
+  name: 'UserCheckDepth',
+  description: 'User entity',
+  fields: () => ({
+    id: {
+      type: new GraphQLNonNull(GraphQLString),
+      description: 'The id of the user.',
+    },
+    firstName: {
+      type: GraphQLString,
+      description: 'The first name of the user.',
+    },
+    subscribedToUserUser: {
+      type: new GraphQLList(userCheckDepthType),
+      description: 'subscribed user',
+      resolve: async (user, _source, contextValue) => {
+        return await getAllSubscribedToUserUser(contextValue);
       },
     },
   }),
