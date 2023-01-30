@@ -10,7 +10,7 @@ import {
 import {
   userType,
   userWithSubscribedToProfileType,
-  userWithSubscribedToPostsType,
+  userByIdWithSubscribedToUserPostsType,
   userCreateInputType,
   userUpdateInputType,
 } from './user/type';
@@ -30,7 +30,7 @@ import {
   userGetAll,
   userGetById,
   getAllSubscribedProfiles,
-  getAllSubscribedPosts,
+  getAllSubscribedToUserPosts,
   userCreate,
   userUpdate,
   subscribeTo,
@@ -136,8 +136,8 @@ export const queryType = new GraphQLObjectType({
         return await getAllSubscribedProfiles(contextValue);
       },
     },
-    userSubscribedToWithPosts: {
-      type: userWithSubscribedToPostsType,
+    userByIdWithSubscribedToUserPosts: {
+      type: userByIdWithSubscribedToUserPostsType,
       args: {
         id: {
           description: 'post id',
@@ -145,7 +145,7 @@ export const queryType = new GraphQLObjectType({
         },
       },
       resolve: async (_source, args, contextValue) => {
-        return await getAllSubscribedPosts(args, contextValue);
+        return await getAllSubscribedToUserPosts(args, contextValue);
       },
     },
   }),
@@ -340,7 +340,7 @@ export const rootSchema: GraphQLSchema = new GraphQLSchema({
     profileType,
     memberType,
     userWithSubscribedToProfileType,
-    userWithSubscribedToPostsType,
+    userByIdWithSubscribedToUserPostsType,
     userCreateInputType,
     userUpdateInputType,
     memberTypeUpdateInputType,

@@ -83,10 +83,14 @@ export const userWithSubscribedToProfileType = new GraphQLObjectType({
       description: 'The email name of the user.',
     },
     subscribedToUserIds: {
+      type: new GraphQLList(GraphQLString),
+      description: 'subscribed',
+    },
+    subscribedToUserProfiles: {
       type: new GraphQLList(profileType),
       description: 'profiles of subscribedToUsers',
       resolve: async (user, _source, contextValue) => {
-        return user.subscribedToUserIds;
+        return user.subscribedToUserProfiles;
       },
     },
     posts: {
@@ -113,7 +117,7 @@ export const userWithSubscribedToProfileType = new GraphQLObjectType({
   }),
 });
 
-export const userWithSubscribedToPostsType = new GraphQLObjectType({
+export const userByIdWithSubscribedToUserPostsType = new GraphQLObjectType({
   name: 'userWithSubscribedToPosts',
   description: 'Get all users with their ubscribedTo profile',
   fields: () => ({
@@ -134,11 +138,8 @@ export const userWithSubscribedToPostsType = new GraphQLObjectType({
       description: 'The email name of the user.',
     },
     subscribedToUserIds: {
-      type: new GraphQLList(postType),
-      description: 'profiles of subscribedToUsers',
-      resolve: async (user, _source, contextValue) => {
-        return user.subscribedToUserIds;
-      },
+      type: new GraphQLList(GraphQLString),
+      description: 'subscribed',
     },
     posts: {
       type: new GraphQLList(postType),
@@ -159,6 +160,13 @@ export const userWithSubscribedToPostsType = new GraphQLObjectType({
       description: 'users memberTypes',
       resolve: async (user, _source, contextValue) => {
         return await userGetUsersMemberTypes(user, contextValue);
+      },
+    },
+    subscribedToUserPosts: {
+      type: new GraphQLList(postType),
+      description: 'subscribed To User Posts',
+      resolve: async (user, _source, contextValue) => {
+        return user.subscribedToUserPosts;
       },
     },
   }),

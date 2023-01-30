@@ -94,11 +94,11 @@ export const getAllSubscribedProfiles = async ({
       user.subscribedToUserIds.includes(profile.userId)
     );
 
-    return { ...user, subscribedToUserIds: subscribedToUserProfiles };
+    return { ...user, subscribedToUserProfiles };
   });
 };
 
-export const getAllSubscribedPosts = async (
+export const getAllSubscribedToUserPosts = async (
   { id }: { id: string },
   {
     fastify,
@@ -108,13 +108,22 @@ export const getAllSubscribedPosts = async (
 ): Promise<any> => {
   const user: UserEntity | null = await userGetById({ id }, { fastify });
 
-  const posts = await postGetAll({ fastify });
-  if (user) {
-    const subscribedToUserPosts = posts.filter((post: PostEntity) =>
-      user.subscribedToUserIds.includes(post.userId)
-    );
+  const users: UserEntity[] = await userGetAll({ fastify });
 
-    return { ...user, subscribedToUserIds: subscribedToUserPosts };
+  const posts = await postGetAll({ fastify });
+
+  if (user) {
+    const followersIds = users
+      .filter((item: UserEntity) => {
+        if (item.subscribedToUserIds.includes(user.id)) return true;
+      })
+      .map((el) => el.id);
+
+    const subscribedToUserPosts = posts.filter((post: PostEntity) => {
+      if (followersIds.includes(post.userId)) return true;
+    });
+
+    return { ...user, subscribedToUserPosts };
   }
 };
 
