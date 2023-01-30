@@ -210,7 +210,11 @@ export const getAllSubscribedToUserUser = async ({
     const subscribedToUserUser = users.filter((el) => {
       if (user.subscribedToUserIds.includes(el.id)) return true;
     });
-    return { ...user, subscribedToUserUser: subscribedToUserUser };
+    return {
+      ...user,
+      userSubscribedTo: user.subscribedToUserIds,
+      subscribedToUserUser: subscribedToUserUser,
+    };
   });
 };
 

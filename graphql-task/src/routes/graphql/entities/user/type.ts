@@ -181,11 +181,11 @@ export const userCheckDepthType: any = new GraphQLObjectType({
       type: new GraphQLNonNull(GraphQLString),
       description: 'The id of the user.',
     },
-    firstName: {
-      type: GraphQLString,
-      description: 'The first name of the user.',
+    userSubscribedTo: {
+      type: new GraphQLList(GraphQLString),
+      description: 'subscribed',
     },
-    subscribedToUserUser: {
+    subscribedToUser: {
       type: new GraphQLList(userCheckDepthType),
       description: 'subscribed user',
       resolve: async (user, _source, contextValue) => {
