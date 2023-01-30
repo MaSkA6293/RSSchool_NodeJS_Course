@@ -30,5 +30,14 @@ export const memberTypeUpdate = async (
   },
   { fastify }: any
 ): Promise<any> => {
-  return await fastify.db.memberTypes.change(id, update);
+  const result = await fastify.inject({
+    method: 'PATCH',
+    url: `member-types/${id}`,
+    body: update,
+  });
+  if (result.statusCode === 400)
+    throw new Error(
+      `Bad request, check data. Probably member-type with ID=${id} does not exist`
+    );
+  return result.json();
 };

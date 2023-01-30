@@ -24,7 +24,9 @@ export const userGetById = async (
     url: `/users/${id}`,
   });
   if (result.statusCode === 200) return result.json();
-  return null;
+  throw new Error(
+    `Bad request, check data. Probably user with ID=${id} does not exist`
+  );
 };
 
 export const userGetUsersPosts = async (
@@ -48,7 +50,7 @@ export const userGetUsersProfiles = async (
   });
   return profiles
     .json()
-    .filter((profile: ProfileEntity) => profile.userId === id);
+    .filter((profile: ProfileEntity) => profile.userId === id)[0];
 };
 
 export const userGetUsersMemberTypes = async (
@@ -142,7 +144,16 @@ export const userUpdate = async (
   },
   { fastify }: any
 ): Promise<any> => {
-  return await fastify.db.users.change(id, update);
+  const result = await fastify.inject({
+    method: 'PATCH',
+    url: `users/${id}`,
+    body: update,
+  });
+  if (result.statusCode === 400)
+    throw new Error(
+      `Bad request, check data. Probably user with ID=${id} does not exist`
+    );
+  return result.json();
 };
 
 export const subscribeTo = async (
@@ -157,7 +168,7 @@ export const subscribeTo = async (
   });
   if (result.statusCode === 400)
     throw new Error(
-      'Bad request, check data. Probably with ID=userId does not exist'
+      `Bad request, check data. Probably user with ID=${userId} does not exist`
     );
   return result.json();
 };
@@ -174,7 +185,7 @@ export const unsubscribeFrom = async (
   });
   if (result.statusCode === 400)
     throw new Error(
-      'Bad request, check data. Probably with ID=userId does not exist, or this user does not have subscription = unsubscribeFromId'
+      `Bad request, check data. Probably user with ID=${userId} does not exist, or this user does not have subscription = unsubscribeFromId`
     );
   return result.json();
 };

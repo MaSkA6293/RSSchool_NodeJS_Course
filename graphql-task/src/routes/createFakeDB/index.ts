@@ -61,18 +61,6 @@ const profiles: ProfileEntity[] = [
   },
   {
     id: '2',
-    avatar: 'hello John second profile',
-    sex: 'male',
-    birthday: 1970,
-    country: 'France',
-    street: 'Second Avenue',
-    city: 'Paris',
-    memberTypeId: 'business',
-    userId: '1',
-  },
-
-  {
-    id: '3',
     avatar: 'hello Diana',
     sex: 'female',
     birthday: 1991,
@@ -80,17 +68,6 @@ const profiles: ProfileEntity[] = [
     street: 'First Avenue',
     city: 'New York',
     memberTypeId: 'basic',
-    userId: '2',
-  },
-  {
-    id: '4',
-    avatar: 'hello Diana second profile',
-    sex: 'female',
-    birthday: 1997,
-    country: 'France',
-    street: 'Second Avenue',
-    city: 'Paris',
-    memberTypeId: 'business',
     userId: '2',
   },
 ];
@@ -121,17 +98,10 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
     await Promise.all(createPosts);
 
     const createProfiles = profiles.map(async (el, i) => {
-      if (i < 2) {
-        return await fastify.db.profiles.create({
-          ...el,
-          userId: userData[0].id,
-        });
-      } else {
-        return await fastify.db.profiles.create({
-          ...el,
-          userId: userData[1].id,
-        });
-      }
+      return await fastify.db.profiles.create({
+        ...el,
+        userId: userData[i].id,
+      });
     });
     await Promise.all(createProfiles);
 

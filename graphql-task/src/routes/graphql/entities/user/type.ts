@@ -45,8 +45,8 @@ export const userType = new GraphQLObjectType({
         return await userGetUsersPosts(user, contextValue);
       },
     },
-    profiles: {
-      type: new GraphQLList(profileType),
+    profile: {
+      type: profileType,
       description: 'users profiles',
       resolve: async (user, _source, contextValue) => {
         return await userGetUsersProfiles(user, contextValue);

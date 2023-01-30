@@ -35,7 +35,15 @@ export const profileCreate = async (
   },
   { fastify }: any
 ): Promise<any> => {
-  return await fastify.db.profiles.create({ ...args });
+  const result = await fastify.inject({
+    method: 'POST',
+    url: `/profiles`,
+    body: { ...args },
+  });
+  if (result.statusCode === 200) return result.json();
+  throw new Error(
+    `Bad request, check data. Probably user with userId = ${args.userId} does not exist, also check memberTypeId is correct. And the user probably already has profile!`
+  );
 };
 
 export const profileUpdate = async (
@@ -51,5 +59,14 @@ export const profileUpdate = async (
   },
   { fastify }: any
 ): Promise<any> => {
-  return await fastify.db.profiles.change(id, update);
+  const result = await fastify.inject({
+    method: 'PATCH',
+    url: `profiles/${id}`,
+    body: update,
+  });
+  if (result.statusCode === 400)
+    throw new Error(
+      `Bad request, check data. Probably post with ID=${id} does not exist`
+    );
+  return result.json();
 };
